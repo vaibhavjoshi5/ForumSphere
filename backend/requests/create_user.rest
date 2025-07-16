@@ -1,0 +1,12 @@
+POST http://localhost:3001/signup/
+Content-Type: application/json
+
+{
+  "firstName": "Gnana Prakash",
+  "lastName": "Punnavajhala",
+  "userName": "GnaniPGP",
+  "email": "gnanaprakashpunnavajhala@gmail.com",
+  "age": 18,
+  "contactNumber": "9191919191",
+  "password": "testPassword"
+}

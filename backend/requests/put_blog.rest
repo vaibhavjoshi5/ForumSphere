@@ -1,0 +1,11 @@
+PUT http://localhost:3001/api/blogs/63c96f392bccc506908d4384
+Content-Type: application/json
+Authorization: bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6IlBlcnNvbl9wMiIsImlkIjoiNjNjN2MyMWExZDE3MTgwZTRlNzkxMzJhIiwiaWF0IjoxNjc0MTQ3OTU2LCJleHAiOjE2NzQxNTE1NTZ9.wEs6DjQFEWyEYG3hqdYnxFe8BqZXkFNdUExN2oblzUA
+
+{
+  "title": "Final test",
+  "author": "GP",
+  "url": "www.google.com",
+  "likes": 10,
+  "user": "63c7c21a1d17180e4e79132a"
+}

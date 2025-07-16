@@ -1,0 +1,52 @@
+version: '3.1'
+
+services:
+    mongodb:
+      image: mongo:5.0
+      container_name: mongodb
+      restart: unless-stopped
+      ports:
+        - 27017:27017
+      volumes:
+        - mongodb_data:/data/db
+      networks:
+        - web-network
+
+    backend:
+      build: ./backend
+      environment:
+        - PORT=3001
+        - MONGODB_URI=mongodb://mongodb:27017/socialhub
+      restart: unless-stopped
+      depends_on:
+        - mongodb
+      networks:
+        - web-network
+
+
+    frontend:
+      build: ./frontend
+      environment:
+        - PORT=3000
+      networks:
+        - web-network
+    nginx:
+      image: nginx
+      container_name: webserver
+      restart: unless-stopped
+      depends_on:
+        - backend
+        - frontend
+      ports:
+        - 8080:8080
+      volumes:
+        - ./nginx/local.conf:/etc/nginx/nginx.conf
+      networks:
+        - web-network
+
+networks:
+  web-network:
+    driver: bridge
+
+volumes:
+  mongodb_data:
