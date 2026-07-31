@@ -18,6 +18,7 @@ out/
 .env.development.local
 .env.test.local
 .env.production.local
+.vercel/
 
 # Runtime data
 pids
@@ -85,7 +86,7 @@ dist
 
 # Gatsby files
 .cache/
-public
+/public
 
 # Storybook build outputs
 .out

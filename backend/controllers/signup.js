@@ -8,9 +8,13 @@ signupRouter.post('/', async (request, response) => {
   if (!firstName || !lastName || !userName || !email || !age || !contactNumber || !password)
     return response.status(400).json({ error: 'All the fields must be filled' })
 
-  const existingUser = await User.findOne({ userName })
+  if (password.length < 8)
+    return response.status(400).json({ error: 'Password must be at least 8 characters long' })
+
+  const normalizedEmail = email.trim().toLowerCase()
+  const existingUser = await User.findOne({ $or: [{ userName }, { email: normalizedEmail }] })
   if (existingUser)
-    return response.status(400).json({ error: 'Username is not available to take. Please choose another username' })
+    return response.status(409).json({ error: 'Username or email is already registered' })
 
   const saltRounds = 10
   const passwordHash = await bcrypt.hash(password, saltRounds)
@@ -19,7 +23,7 @@ signupRouter.post('/', async (request, response) => {
     firstName: firstName,
     lastName: lastName,
     userName: userName,
-    email: email,
+    email: normalizedEmail,
     age: age,
     contactNumber: contactNumber,
     passwordHash: passwordHash,

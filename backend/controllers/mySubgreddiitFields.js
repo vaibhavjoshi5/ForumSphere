@@ -13,11 +13,15 @@ mySubgreddiitRouter.get('/', async (request, response) => {
 
 mySubgreddiitRouter.get('/:id', async (request, response) => {
   const mySubGreddiitPage = await mySubgreddiit.findById(request.params.id).populate('requests').populate('reports')
+  if (!mySubGreddiitPage)
+    return response.status(404).json({ error: 'Community not found' })
 
-  if (request.user.id === mySubGreddiitPage.creator.toString() || mySubGreddiitPage.members.find(member => member.toString() === request.user.id) !== undefined) {
+  if (request.user.id === mySubGreddiitPage.creator.toString()) {
     const presentDate = new Date()
-    mySubGreddiitPage.requests = mySubGreddiitPage.requests.filter(request => presentDate.getTime() - request.requestDate.getTime() <= config.REQUEST_EXPIRATION_DAYS || !request.rejected)
-    mySubGreddiitPage.reports = mySubGreddiitPage.reports.filter(report => presentDate.getTime() - report.reportedDate.getTime() <= config.REPORT_EXPIRATION_DAYS)
+    const requestExpiryMs = (Number(config.REQUEST_EXPIRATION_DAYS) || 7) * 24 * 60 * 60 * 1000
+    const reportExpiryMs = (Number(config.REPORT_EXPIRATION_DAYS) || 7) * 24 * 60 * 60 * 1000
+    mySubGreddiitPage.requests = mySubGreddiitPage.requests.filter(joinRequest => !joinRequest.rejected || presentDate - joinRequest.requestDate <= requestExpiryMs)
+    mySubGreddiitPage.reports = mySubGreddiitPage.reports.filter(report => presentDate - report.reportedDate <= reportExpiryMs)
     const updatedMySubGreddiitPage = await mySubgreddiit.findByIdAndUpdate(request.params.id, mySubGreddiitPage, { new: true })
       .populate('creator').populate('members').populate('blocked').populate('reports')
       .populate({
@@ -174,6 +178,8 @@ mySubgreddiitRouter.post('/:id/requests', async (request, response) => {
   const subId = request.params.id
 
   const requestSub = await mySubgreddiit.findById(subId)
+  if (!requestSub)
+    return response.status(404).json({ error: 'Community not found' })
 
   if (requestSub.creator.toString() !== user.id.toString() && requestSub.members.find(member => member.toString() === user.id.toString()) === undefined) {
     const newRequest = {
@@ -182,7 +188,7 @@ mySubgreddiitRouter.post('/:id/requests', async (request, response) => {
       rejected: false
     }
 
-    const existingRequest = requestSub.requests.find(id => id.userId === newRequest.userId)
+    const existingRequest = requestSub.requests.find(joinRequest => joinRequest.userDetails.toString() === user.id.toString())
 
     if (!existingRequest) {
       requestSub.requests = requestSub.requests.concat(newRequest)
@@ -199,7 +205,7 @@ mySubgreddiitRouter.post('/:id/requests', async (request, response) => {
       }
       response.status(201).json(responseObj)
     } else
-      response.status(200).json()
+      response.status(409).json({ error: 'Join request already submitted' })
   } else
     response.status(400).json({ error: 'You are already a member of the subgreddiit!' }).end()
 })
@@ -209,6 +215,8 @@ mySubgreddiitRouter.put('/:id/requests', async (request, response) => {
   const subId = request.params.id
 
   const requestSub = await mySubgreddiit.findById(subId)
+  if (!requestSub)
+    return response.status(404).json({ error: 'Community not found' })
 
   if (requestSub.creator.toString() === user.id) {
     const reqId = request.body.requestId
@@ -220,10 +228,17 @@ mySubgreddiitRouter.put('/:id/requests', async (request, response) => {
         requestSub.members = requestSub.members.concat(reqId)
     } else {
       const req = requestSub.requests.find(request => request.userDetails.toString() === reqId)
+      if (!req)
+        return response.status(404).json({ error: 'Join request not found' })
       req.rejected = true
-      requestSub.requests = requestSub.requests.map(request => request.userId !== reqId ? request : req)
     }
-    const returnedSub = await requestSub.save()
+    await requestSub.save()
+    const returnedSub = await mySubgreddiit.findById(subId)
+      .populate('creator').populate('members').populate('blocked').populate({
+        path: 'requests',
+        populate: { path: 'userDetails', model: 'User' }
+      })
+    returnedSub.requests = returnedSub.requests.filter(joinRequest => !joinRequest.rejected)
     response.status(200).json(returnedSub)
   } else
     response.status(403).json({ error: 'Cannot take action on requests without being the moderator of the subgreddiit!' }).end()

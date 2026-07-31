@@ -1,9 +1,7 @@
 require('express-async-errors')
-const config = require('./utils/config')
 const express = require('express')
 const app = express()
 const cors = require('cors')
-const mongoose = require('mongoose')
 
 const signinRouter = require('./controllers/signin')
 const signupRouter = require('./controllers/signup')
@@ -12,26 +10,29 @@ const mySubgreddiitRouter = require('./controllers/mySubgreddiitFields')
 const subgreddiitRouter = require('./controllers/subGreddiitFields')
 
 const middleware = require('./utils/middleware')
-const logger = require('./utils/logger')
 const savedPostsRouter = require('./controllers/postFields')
-
-logger.info('connecting to', config.MONGODB_URI)
-
-const connectDB = async () => {
-  mongoose.connect(config.MONGODB_URI)
-  logger.info('connected to MongoDB')
-}
-connectDB()
+const connectDB = require('./utils/db')
 
 app.use(cors())
 app.use(express.static('build'))
 app.use(express.json())
 app.use(middleware.requestLogger)
 
-app.use('/api/signin', signinRouter)
-app.use('/api/signup', signupRouter)
+app.get('/api/health', (request, response) => response.json({ status: 'ok' }))
+const ensureDatabase = async (request, response, next) => {
+  await connectDB()
+  next()
+}
+
+app.use('/api/signin', ensureDatabase, signinRouter)
+app.use('/api/signup', ensureDatabase, signupRouter)
 
 app.use(middleware.extractToken)
+app.use(async (request, response, next) => {
+  if (request.token)
+    await connectDB()
+  next()
+})
 app.use(middleware.extractUser)
 
 app.use('/api/profile', userRouter)

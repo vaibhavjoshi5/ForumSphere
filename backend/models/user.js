@@ -11,11 +11,16 @@ const userSchema = new mongoose.Schema({
   },
   userName: {
     type: String,
-    required: [true, 'Username must not be empty']
+    required: [true, 'Username must not be empty'],
+    unique: true,
+    trim: true
   },
   email: {
     type: String,
-    required: [true, 'Email must not be empty']
+    required: [true, 'Email must not be empty'],
+    unique: true,
+    lowercase: true,
+    trim: true
   },
   age: {
     type: Number,

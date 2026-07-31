@@ -1,5 +1,4 @@
 import axios from 'axios'
-import { user } from '../components/Login'
 const profileUrl = '/api/profile'
 
 const getUserFields = async () => {

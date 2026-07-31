@@ -11,8 +11,7 @@ import Button from '@mui/material/Button'
 import MenuItem from '@mui/material/MenuItem'
 import AdbIcon from '@mui/icons-material/Adb'
 import LogoutIcon from '@mui/icons-material/Logout'
-import { user, setUser } from './Login'
-import { useNavigate, useMatch } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
 
 import RedditIcon from '@mui/icons-material/Reddit'
 import LineWeightIcon from '@mui/icons-material/LineWeight'
@@ -23,11 +22,13 @@ import PendingActionsIcon from '@mui/icons-material/PendingActions'
 import BarChartIcon from '@mui/icons-material/BarChart'
 import ReportIcon from '@mui/icons-material/Report'
 
-const Navbar = () => {
+const Navbar = ({ user, onLogout }) => {
   const [anchorElNav, setAnchorElNav] = useState(null)
-  const [subId, setSubId] = useState('')
   const navigate = useNavigate()
-  const mySubPageMatch = useMatch('/mysubgreddiits/:id/*')
+  const location = useLocation()
+  const moderatorPathMatch = location.pathname.match(/^\/mysubgreddiits\/([a-f\d]{24})(?:\/|$)/i)
+  const subId = moderatorPathMatch?.[1] || ''
+  const isModeratorPage = Boolean(subId)
 
   const handleOpenNavMenu = (event) => {
     setAnchorElNav(event.currentTarget)
@@ -46,14 +47,13 @@ const Navbar = () => {
           navigate(`/mysubgreddiits/${subId}/reports`)
       }
 
-      if (mySubPageMatch) {
-        setSubId(document.URL.substring(37).split('/')[0])
+      if (isModeratorPage) {
         document.addEventListener('keypress', handleKeyboardShortcut)
       }
 
       return () => document.removeEventListener('keypress', handleKeyboardShortcut)
     }
-    , [mySubPageMatch, subId, navigate]
+    , [isModeratorPage, subId, navigate]
   )
 
   const mySubPages = [
@@ -67,11 +67,11 @@ const Navbar = () => {
     setAnchorElNav(null)
   }
 
-  const handeLogout = event => {
+  const handleLogout = event => {
     event.preventDefault()
     window.localStorage.removeItem('loggedUser')
     navigate('/signin')
-    setUser(null)
+    onLogout()
   }
 
   const handleRedirect = (event, url) => {
@@ -93,7 +93,7 @@ const Navbar = () => {
     }}>
       <Container maxWidth='xl'>
         <Toolbar disableGutters>
-          <Typography onClick={event => handleRedirect(event, '/profile')}>
+          <Typography onClick={event => handleRedirect(event, '/home')}>
             <IconButton sx={{
               display: { xs: 'none', md: 'flex' },
               color: 'white',
@@ -144,7 +144,7 @@ const Navbar = () => {
                     <Typography textAlign='center' onClick={event => handleNavListRedirect(event, '/mysubgreddiits')}>My Communities</Typography>
                   </MenuItem>
                   {
-                    mySubPageMatch ?
+                    isModeratorPage ?
                       mySubPages.map(page =>
                         <MenuItem key={page.url}>
                           <Typography textAlign='center' onClick={event => handleNavListRedirect(event, page.url)}>{page.name}</Typography>
@@ -202,7 +202,7 @@ const Navbar = () => {
                   My Communities
                 </Button>
                 {
-                  mySubPageMatch ?
+                  isModeratorPage ?
                     <>
                       <Button
                         onClick={event => handleRedirect(event, `/mysubgreddiits/${subId}/users`)}
@@ -278,7 +278,7 @@ const Navbar = () => {
                 background: 'rgba(255, 69, 0, 1)',
                 transform: 'scale(1.05)',
               }
-            }} endIcon={<LogoutIcon />} onClick={handeLogout}>
+            }} endIcon={<LogoutIcon />} onClick={handleLogout}>
               Logout
             </Button>:
               null

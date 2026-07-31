@@ -11,18 +11,19 @@ import Box from '@mui/material/Box'
 import LockOutlinedIcon from '@mui/icons-material/LockOutlined'
 import Typography from '@mui/material/Typography'
 import Container from '@mui/material/Container'
+import Alert from '@mui/material/Alert'
+import CircularProgress from '@mui/material/CircularProgress'
 import { createTheme, ThemeProvider } from '@mui/material/styles'
 
-let user = null
 const theme = createTheme()
-const setUser = newUser => user = newUser
 
-const SignIn = ({ setSignInForm }) => {
+const SignIn = ({ setSignInForm, onLogin, successMessage }) => {
   const [userName, setUserName] = useState('')
   const [userNameError, setUserNameError] = useState(false)
   const [password, setPassword] = useState('')
   const [passwordError, setPasswordError] = useState(false)
   const [signInDisable, setSignInDisable] = useState(false)
+  const [submitError, setSubmitError] = useState('')
 
   const navigate = useNavigate()
 
@@ -36,16 +37,16 @@ const SignIn = ({ setSignInForm }) => {
 
     try {
       setSignInDisable(true)
-      user = await signin(userData)
-      setSignInDisable(false)
+      setSubmitError('')
+      const user = await signin(userData)
       window.localStorage.setItem('loggedUser', JSON.stringify(user))
-      navigate('/profile')
+      onLogin(user)
+      navigate('/home')
     } catch (exception) {
+      setSubmitError(exception.response?.data?.error || 'Unable to sign in. Please try again.')
+    } finally {
       setSignInDisable(false)
     }
-
-    setUserName('')
-    setPassword('')
   }
 
   const formChange = event => {
@@ -95,6 +96,8 @@ const SignIn = ({ setSignInForm }) => {
               mb: 2
             }}>Sign In to SocialHub</Typography>
             <Box component='form' onSubmit={signIn} noValidate sx={{ mt: 1 }}>
+              {successMessage && <Alert severity='success' sx={{ mb: 1 }}>{successMessage}</Alert>}
+              {submitError && <Alert severity='error' sx={{ mb: 1 }}>{submitError}</Alert>}
               <TextField margin='normal' required fullWidth id='userName' label='Username' name='username' autoComplete='username'
                 value={userName} onChange={userNameChange} helperText={userNameError ? 'Username is a required field' : ''} error={userNameError} onBlur={userNameBlur} 
                 sx={{ '& .MuiOutlinedInput-root': { borderRadius: '12px' } }} />
@@ -115,7 +118,9 @@ const SignIn = ({ setSignInForm }) => {
                   transform: 'translateY(-2px)',
                   boxShadow: '0 6px 20px rgba(0, 0, 0, 0.3)',
                 }
-              }} disabled={!userName || !password || signInDisable}>Sign In</Button>
+              }} disabled={!userName || !password || signInDisable}>
+                {signInDisable ? <CircularProgress size={24} color='inherit' /> : 'Sign In'}
+              </Button>
               <Grid container justifyContent='flex-end'>
                 <Grid item>
                   <Link href='/signin' onClick={formChange} variant='body2'>Don&apos;t have an account? Sign Up</Link>
@@ -129,7 +134,7 @@ const SignIn = ({ setSignInForm }) => {
   )
 }
 
-const SignUp = ({ setSignInForm }) => {
+const SignUp = ({ setSignInForm, onSignupSuccess }) => {
   const [firstName, setFirstName] = useState('')
   const [lastName, setLastName] = useState('')
   const [userName, setUserName] = useState('')
@@ -146,6 +151,7 @@ const SignUp = ({ setSignInForm }) => {
   const [contactNumberError, setContactNumberError] = useState(false)
   const [passwordError, setPasswordError] = useState(false)
   const [signUpDisable, setSignUpDisable] = useState(false)
+  const [submitError, setSubmitError] = useState('')
 
   const firstNameChange = event => setFirstName(event.target.value)
   const lastNameChange = event => setLastName(event.target.value)
@@ -161,10 +167,15 @@ const SignUp = ({ setSignInForm }) => {
   const emailBlur = event => !event.target.value ? setEmailError(true) : setEmailError(false)
   const ageBlur = event => !event.target.value ? setAgeError(true) : setAgeError(false)
   const contactNumberBlur = event => !event.target.value ? setContactNumberError(true) : setContactNumberError(false)
-  const passwordBlur = event => !event.target.value ? setPasswordError(true) : setPasswordError(false)
+  const passwordBlur = event => setPasswordError(event.target.value.length < 8)
 
   const signUp = async event => {
     event.preventDefault()
+    if (password.length < 8) {
+      setPasswordError(true)
+      setSubmitError('Password must be at least 8 characters long.')
+      return
+    }
     const userData = {
       firstName: firstName,
       lastName: lastName,
@@ -179,18 +190,12 @@ const SignUp = ({ setSignInForm }) => {
 
     try {
       setSignUpDisable(true)
+      setSubmitError('')
       await signup(userData)
-      setSignUpDisable(false)
-      setSignInForm(true)
-
-      setFirstName('')
-      setLastName('')
-      setUserName('')
-      setEmail('')
-      setAge('')
-      setContactNumber('')
-      setPassword('')
+      onSignupSuccess()
     } catch (exception) {
+      setSubmitError(exception.response?.data?.error || 'Unable to create account. Please try again.')
+    } finally {
       setSignUpDisable(false)
     }
   }
@@ -265,6 +270,7 @@ const SignUp = ({ setSignInForm }) => {
               Create your account and start connecting
             </Typography>
             <Box component='form' noValidate onSubmit={signUp} sx={{ mt: 2, width: '100%' }}>
+              {submitError && <Alert severity='error' sx={{ mb: 2 }}>{submitError}</Alert>}
               <Grid container spacing={3}>
                 <Grid item xs={12} sm={6}>
                   <TextField 
@@ -433,7 +439,7 @@ const SignUp = ({ setSignInForm }) => {
                     autoComplete='new-password'
                     value={password} 
                     onChange={passwordChange} 
-                    helperText={passwordError ? 'Password is a required field' : ''} 
+                    helperText={passwordError ? 'Password must be at least 8 characters' : 'Use at least 8 characters'} 
                     error={passwordError} 
                     onBlur={passwordBlur}
                     sx={{ 
@@ -476,9 +482,9 @@ const SignUp = ({ setSignInForm }) => {
                     boxShadow: 'none'
                   }
                 }}
-                disabled={!firstName || !lastName || !userName || !email || !age || !contactNumber || !password || signUpDisable}
+                disabled={!firstName || !lastName || !userName || !email || !age || !contactNumber || password.length < 8 || signUpDisable}
               >
-                🚀 Create Account
+                {signUpDisable ? <CircularProgress size={24} color='inherit' /> : 'Create Account'}
               </Button>
               <Grid container justifyContent='center'>
                 <Grid item>
@@ -509,14 +515,22 @@ const SignUp = ({ setSignInForm }) => {
   )
 }
 
-const LoginForms = () => {
+const LoginForms = ({ onLogin }) => {
   const [signInForm, setSignInForm] = useState(true)
+  const [successMessage, setSuccessMessage] = useState('')
+
+  const handleSignupSuccess = () => {
+    setSuccessMessage('Account created successfully. You can now sign in.')
+    setSignInForm(true)
+  }
 
   return (
     <div>
-      {signInForm ? <SignIn setSignInForm={setSignInForm} /> : <SignUp setSignInForm={setSignInForm} />}
+      {signInForm
+        ? <SignIn setSignInForm={setSignInForm} onLogin={onLogin} successMessage={successMessage} />
+        : <SignUp setSignInForm={setSignInForm} onSignupSuccess={handleSignupSuccess} />}
     </div>
   )
 }
 
-export { LoginForms, user, setUser }
+export { LoginForms }

@@ -18,7 +18,7 @@ import RecentActorsOutlinedIcon from '@mui/icons-material/RecentActorsOutlined'
 import ArrowForwardOutlinedIcon from '@mui/icons-material/ArrowForwardOutlined'
 import ArrowBackOutlinedIcon from '@mui/icons-material/ArrowBackOutlined'
 
-import { updateUser, updateFollowerByID, updateFollowingByID, removeFollower as removeFollowerAPI, getUserFields } from '../../services/userFields'
+import { updateFollowerByID, removeFollower as removeFollowerAPI, getUserFields } from '../../services/userFields'
 
 const Followers = ({ initialUser, setInitialUser, refreshUserData }) => {
   const [open, setOpen] = useState(false)
@@ -30,12 +30,8 @@ const Followers = ({ initialUser, setInitialUser, refreshUserData }) => {
 
   const removeFollower = async deleteFollower => {
     try {
-      const finalUser = { ...initialUser }
-      finalUser.followers = initialUser.followers.filter(follower => (follower._id || follower.id).toString() !== (deleteFollower._id || deleteFollower.id).toString())
-      await updateUser(user.token, finalUser)
-      setInitialUser(finalUser)
-      await updateFollowerByID(user.token, deleteFollower._id || deleteFollower.id)
-      // Also refresh user data to ensure UI is updated
+      const updatedUser = await updateFollowerByID(user.token, deleteFollower._id || deleteFollower.id)
+      setInitialUser(updatedUser)
       if (refreshUserData) {
         await refreshUserData()
       }
@@ -97,7 +93,6 @@ const Followers = ({ initialUser, setInitialUser, refreshUserData }) => {
 const Following = ({ initialUser, setInitialUser, refreshUserData }) => {
   const [open, setOpen] = useState(false)
   const [followingList, setFollowingList] = useState(initialUser?.following || [])
-  const [forceUpdate, setForceUpdate] = useState(0)
   const [isUnfollowing, setIsUnfollowing] = useState(false)
   const user = JSON.parse(window.localStorage.getItem('loggedUser'))
 
@@ -106,11 +101,6 @@ const Following = ({ initialUser, setInitialUser, refreshUserData }) => {
     console.log('Following component: initialUser changed:', initialUser?.following)
     setFollowingList(initialUser?.following || [])
   }, [initialUser])
-
-  // Force component update
-  useEffect(() => {
-    setFollowingList(initialUser?.following || [])
-  }, [forceUpdate])
 
   const handleClick = () => setOpen(!open)
 
@@ -143,9 +133,6 @@ const Following = ({ initialUser, setInitialUser, refreshUserData }) => {
       setFollowingList(newFollowingList)
       setInitialUser(updatedUser)
       
-      // Force update trigger
-      setForceUpdate(prev => prev + 1)
-      
       // Double-check by getting fresh data from server
       console.log('=== DOUBLE CHECK: Getting fresh data from server ===')
       const freshUserData = await getUserFields()
@@ -155,15 +142,6 @@ const Following = ({ initialUser, setInitialUser, refreshUserData }) => {
       // Update with fresh data
       setFollowingList(freshUserData.following || [])
       setInitialUser(freshUserData)
-      
-      // Force another update trigger
-      setForceUpdate(prev => prev + 1)
-      
-      // Force state reset after a tiny delay
-      setTimeout(() => {
-        setFollowingList(freshUserData.following || [])
-        setForceUpdate(prev => prev + 1)
-      }, 50)
       
       // Also call refresh function to ensure parent component updates
       if (refreshUserData) {
@@ -181,21 +159,9 @@ const Following = ({ initialUser, setInitialUser, refreshUserData }) => {
     }
   }
 
-  const followingCount = () => {
-    // Use actual length from current state
-    const actualLength = followingList?.length || 0
-    const count = `Following: ${actualLength}`
-    console.log('Following count:', count, 'List:', followingList)
-    return count
-  }
-
-  // Force re-render by creating a key based on the following list length and update counter
-  const listKey = `following-${followingList.length}-${forceUpdate}-${Date.now()}`
-
   return (
-    <div key={listKey}>
+    <div>
       <List
-        key={`list-${followingList.length}-${forceUpdate}-${Date.now()}`}
         sx={{ width: '100%', maxWidth: 360, bgcolor: 'background.paper' }}
         component='nav'
         aria-labelledby='nested-list-subheader'
@@ -205,11 +171,11 @@ const Following = ({ initialUser, setInitialUser, refreshUserData }) => {
           </ListSubheader>
         }
       >
-        <ListItemButton onClick={handleClick} key={`button-${followingList.length}-${forceUpdate}`}>
+        <ListItemButton onClick={handleClick}>
           <ListItemIcon>
             <RecentActorsOutlinedIcon /><ArrowBackOutlinedIcon />
           </ListItemIcon>
-          <div style={{ flex: 1 }} key={`count-${followingList.length}-${forceUpdate}-${Date.now()}`}>
+          <div style={{ flex: 1 }}>
             <span style={{ fontSize: '16px', color: '#333' }}>
               Following: {followingList?.length || 0}
             </span>

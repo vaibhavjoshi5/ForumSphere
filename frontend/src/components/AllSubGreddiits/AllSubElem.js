@@ -21,6 +21,7 @@ const AllSubElem = ({ allSubId }) => {
   const [userData, setUserData] = useState({})
   const [open, setOpen] = useState(false)
   const [allDisable, setAllDisable] = useState(false)
+  const [requestError, setRequestError] = useState('')
 
   useEffect(
     () => {
@@ -48,10 +49,16 @@ const AllSubElem = ({ allSubId }) => {
   const onRequestJoin = async () => {
     if (userData.left.includes(allSubId)) setOpen(true)
     else {
-      setAllDisable(true)
-      const requestedSub = await addJoinRequest(user.token, allSubId)
-      setSubPageData(requestedSub)
-      setAllDisable(false)
+      try {
+        setAllDisable(true)
+        setRequestError('')
+        const requestedSub = await addJoinRequest(user.token, allSubId)
+        setSubPageData(requestedSub)
+      } catch (error) {
+        setRequestError(error.response?.data?.error || 'Unable to send join request')
+      } finally {
+        setAllDisable(false)
+      }
     }
   }
 
@@ -99,6 +106,7 @@ const AllSubElem = ({ allSubId }) => {
                 ) :
                 null}
             </CardActions>
+            {requestError && <Typography color='error' sx={{ px: 2, pb: 2 }}>{requestError}</Typography>}
           </Card>
           : null
       }
