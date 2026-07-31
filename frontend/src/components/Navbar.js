@@ -11,7 +11,7 @@ import Button from '@mui/material/Button'
 import MenuItem from '@mui/material/MenuItem'
 import AdbIcon from '@mui/icons-material/Adb'
 import LogoutIcon from '@mui/icons-material/Logout'
-import { useNavigate, useMatch } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
 
 import RedditIcon from '@mui/icons-material/Reddit'
 import LineWeightIcon from '@mui/icons-material/LineWeight'
@@ -25,8 +25,10 @@ import ReportIcon from '@mui/icons-material/Report'
 const Navbar = ({ user, onLogout }) => {
   const [anchorElNav, setAnchorElNav] = useState(null)
   const navigate = useNavigate()
-  const mySubPageMatch = useMatch('/mysubgreddiits/:id/*')
-  const subId = mySubPageMatch?.params.id || ''
+  const location = useLocation()
+  const moderatorPathMatch = location.pathname.match(/^\/mysubgreddiits\/([a-f\d]{24})(?:\/|$)/i)
+  const subId = moderatorPathMatch?.[1] || ''
+  const isModeratorPage = Boolean(subId)
 
   const handleOpenNavMenu = (event) => {
     setAnchorElNav(event.currentTarget)
@@ -45,13 +47,13 @@ const Navbar = ({ user, onLogout }) => {
           navigate(`/mysubgreddiits/${subId}/reports`)
       }
 
-      if (mySubPageMatch) {
+      if (isModeratorPage) {
         document.addEventListener('keypress', handleKeyboardShortcut)
       }
 
       return () => document.removeEventListener('keypress', handleKeyboardShortcut)
     }
-    , [mySubPageMatch, subId, navigate]
+    , [isModeratorPage, subId, navigate]
   )
 
   const mySubPages = [
@@ -142,7 +144,7 @@ const Navbar = ({ user, onLogout }) => {
                     <Typography textAlign='center' onClick={event => handleNavListRedirect(event, '/mysubgreddiits')}>My Communities</Typography>
                   </MenuItem>
                   {
-                    mySubPageMatch ?
+                    isModeratorPage ?
                       mySubPages.map(page =>
                         <MenuItem key={page.url}>
                           <Typography textAlign='center' onClick={event => handleNavListRedirect(event, page.url)}>{page.name}</Typography>
@@ -200,7 +202,7 @@ const Navbar = ({ user, onLogout }) => {
                   My Communities
                 </Button>
                 {
-                  mySubPageMatch ?
+                  isModeratorPage ?
                     <>
                       <Button
                         onClick={event => handleRedirect(event, `/mysubgreddiits/${subId}/users`)}

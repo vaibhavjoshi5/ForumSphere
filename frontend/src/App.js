@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Routes, Route, Navigate } from 'react-router-dom'
+import { Routes, Route, Navigate, useParams } from 'react-router-dom'
 import { LoginForms } from './components/Login'
 import { Profile } from './components/User/Profile'
 import { Navbar } from './components/Navbar'
@@ -70,6 +70,18 @@ const theme = createTheme({
   },
 })
 
+const CommunityRoute = ({ user, children }) => {
+  const { id } = useParams()
+
+  if (!user)
+    return <Navigate replace to='/signin' />
+
+  if (!/^[a-f\d]{24}$/i.test(id || ''))
+    return <Navigate replace to='/mysubgreddiits' />
+
+  return children
+}
+
 const App = () => {
   const [user, setUser] = useState(() => {
     try {
@@ -114,11 +126,11 @@ const App = () => {
                 <Route exact path='/profile' element={user ? <Profile /> : <Navigate replace to='/signin' />} />
                 <Route exact path='/signin' element={user ? <Navigate replace to='/home' /> : <LoginForms onLogin={setUser} />} />
                 <Route exact path='/mysubgreddiits' element={user ? <MySubGreddiit /> : <Navigate replace to='/signin' />} />
-                <Route exact path='/mysubgreddiits/:id' element={user ? <Navigate replace to='users' /> : <Navigate replace to='/signin' />} />
-                <Route exact path='/mysubgreddiits/:id/users' element={user ? <MySubUsers /> : <Navigate replace to='/signin' />} />
-                <Route exact path='/mysubgreddiits/:id/requests' element={user ? <MySubRequests /> : <Navigate replace to='/signin' />} />
-                <Route exact path='/mysubgreddiits/:id/stats' element={user ? <MySubStats /> : <Navigate replace to='/signin' />} />
-                <Route exact path='/mysubgreddiits/:id/reports' element={user ? <MySubReports /> : <Navigate replace to='/signin' />} />
+                <Route exact path='/mysubgreddiits/:id' element={<CommunityRoute user={user}><Navigate replace to='users' /></CommunityRoute>} />
+                <Route exact path='/mysubgreddiits/:id/users' element={<CommunityRoute user={user}><MySubUsers /></CommunityRoute>} />
+                <Route exact path='/mysubgreddiits/:id/requests' element={<CommunityRoute user={user}><MySubRequests /></CommunityRoute>} />
+                <Route exact path='/mysubgreddiits/:id/stats' element={<CommunityRoute user={user}><MySubStats /></CommunityRoute>} />
+                <Route exact path='/mysubgreddiits/:id/reports' element={<CommunityRoute user={user}><MySubReports /></CommunityRoute>} />
                 <Route exact path='/allsubgreddiits' element={user ? <AllSubGreddiits /> : <Navigate replace to='/signin' />} />
                 <Route exact path='/home' element={user ? <AllSubGreddiits /> : <Navigate replace to='/signin' />} />
                 <Route exact path='/allsubgreddiits/:id' element={user ? <AllSubGreddiitPage /> : <Navigate replace to='/signin' />} />
