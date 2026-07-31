@@ -158,7 +158,7 @@ const MySubElem = ({ mySub }) => {
         <Button 
           size='small' 
           variant='contained' 
-          onClick={() => navigate(`/mysubgreddiits/${mySub.id}`)} 
+          onClick={() => navigate(`/mysubgreddiits/${mySub.id}/users`)} 
           disabled={allDisable}
           sx={{ 
             borderRadius: '20px',

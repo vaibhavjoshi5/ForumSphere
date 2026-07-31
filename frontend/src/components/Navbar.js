@@ -24,9 +24,9 @@ import ReportIcon from '@mui/icons-material/Report'
 
 const Navbar = ({ user, onLogout }) => {
   const [anchorElNav, setAnchorElNav] = useState(null)
-  const [subId, setSubId] = useState('')
   const navigate = useNavigate()
   const mySubPageMatch = useMatch('/mysubgreddiits/:id/*')
+  const subId = mySubPageMatch?.params.id || ''
 
   const handleOpenNavMenu = (event) => {
     setAnchorElNav(event.currentTarget)
@@ -46,7 +46,6 @@ const Navbar = ({ user, onLogout }) => {
       }
 
       if (mySubPageMatch) {
-        setSubId(document.URL.substring(37).split('/')[0])
         document.addEventListener('keypress', handleKeyboardShortcut)
       }
 

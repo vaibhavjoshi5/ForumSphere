@@ -15,20 +15,31 @@ import CardContent from '@mui/material/CardContent'
 import Typography from '@mui/material/Typography'
 import DoneIcon from '@mui/icons-material/Done'
 import CloseIcon from '@mui/icons-material/Close'
+import Alert from '@mui/material/Alert'
+import CircularProgress from '@mui/material/CircularProgress'
+import Box from '@mui/material/Box'
 
 import { handleJoinRequest } from '../../services/subgreddiits'
 
 const MySubRequests = () => {
   const [mySubPage, setMySubPage] = useState({})
   const [actionDisable, setActionDisable] = useState(false)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
   const params = useParams()
   const user = JSON.parse(window.localStorage.getItem('loggedUser'))
 
   useEffect(
     () => {
       const getSubPage = async () => {
-        const mySubDetails = await getMySubHubPage(user.token, params.id)
-        setMySubPage(mySubDetails)
+        try {
+          const mySubDetails = await getMySubHubPage(user.token, params.id)
+          setMySubPage(mySubDetails)
+        } catch (exception) {
+          setError(exception.response?.data?.error || 'Unable to load join requests')
+        } finally {
+          setLoading(false)
+        }
       }
 
       getSubPage()
@@ -41,14 +52,22 @@ const MySubRequests = () => {
       accept: accept
     }
 
-    setActionDisable(true)
-    const updatedSub = await handleJoinRequest(user.token, mySubPage.id, action)
-    setMySubPage(updatedSub)
-    setActionDisable(false)
+    try {
+      setActionDisable(true)
+      setError('')
+      const updatedSub = await handleJoinRequest(user.token, mySubPage.id, action)
+      setMySubPage(updatedSub)
+    } catch (exception) {
+      setError(exception.response?.data?.error || 'Unable to process join request')
+    } finally {
+      setActionDisable(false)
+    }
   }
 
   return (
     <>
+      {loading && <Box sx={{ display: 'flex', justifyContent: 'center', mt: 6 }}><CircularProgress /></Box>}
+      {error && <Alert severity='error' sx={{ m: 3 }}>{error}</Alert>}
       {
         mySubPage.id &&
         <Grid container spacing={2}>
@@ -56,6 +75,7 @@ const MySubRequests = () => {
             <Card variant='outlined'>
               <CardContent>
                 <Typography variant='h5' component='div'>Requests</Typography>
+                {mySubPage.requests.length === 0 && <Typography color='text.secondary' sx={{ mt: 2 }}>No pending join requests.</Typography>}
                 <List component='div' disablePadding>
                   {
                     mySubPage.requests.map(

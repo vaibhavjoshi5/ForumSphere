@@ -114,7 +114,7 @@ const App = () => {
                 <Route exact path='/profile' element={user ? <Profile /> : <Navigate replace to='/signin' />} />
                 <Route exact path='/signin' element={user ? <Navigate replace to='/home' /> : <LoginForms onLogin={setUser} />} />
                 <Route exact path='/mysubgreddiits' element={user ? <MySubGreddiit /> : <Navigate replace to='/signin' />} />
-                <Route exact path='/mysubgreddiits/:id' element={user ? <></> : <Navigate replace to='/signin' />} />
+                <Route exact path='/mysubgreddiits/:id' element={user ? <Navigate replace to='users' /> : <Navigate replace to='/signin' />} />
                 <Route exact path='/mysubgreddiits/:id/users' element={user ? <MySubUsers /> : <Navigate replace to='/signin' />} />
                 <Route exact path='/mysubgreddiits/:id/requests' element={user ? <MySubRequests /> : <Navigate replace to='/signin' />} />
                 <Route exact path='/mysubgreddiits/:id/stats' element={user ? <MySubStats /> : <Navigate replace to='/signin' />} />
