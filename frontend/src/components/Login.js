@@ -13,11 +13,9 @@ import Typography from '@mui/material/Typography'
 import Container from '@mui/material/Container'
 import { createTheme, ThemeProvider } from '@mui/material/styles'
 
-let user = null
 const theme = createTheme()
-const setUser = newUser => user = newUser
 
-const SignIn = ({ setSignInForm }) => {
+const SignIn = ({ setSignInForm, onLogin }) => {
   const [userName, setUserName] = useState('')
   const [userNameError, setUserNameError] = useState(false)
   const [password, setPassword] = useState('')
@@ -36,9 +34,10 @@ const SignIn = ({ setSignInForm }) => {
 
     try {
       setSignInDisable(true)
-      user = await signin(userData)
+      const user = await signin(userData)
       setSignInDisable(false)
       window.localStorage.setItem('loggedUser', JSON.stringify(user))
+      onLogin(user)
       navigate('/profile')
     } catch (exception) {
       setSignInDisable(false)
@@ -509,14 +508,14 @@ const SignUp = ({ setSignInForm }) => {
   )
 }
 
-const LoginForms = () => {
+const LoginForms = ({ onLogin }) => {
   const [signInForm, setSignInForm] = useState(true)
 
   return (
     <div>
-      {signInForm ? <SignIn setSignInForm={setSignInForm} /> : <SignUp setSignInForm={setSignInForm} />}
+      {signInForm ? <SignIn setSignInForm={setSignInForm} onLogin={onLogin} /> : <SignUp setSignInForm={setSignInForm} />}
     </div>
   )
 }
 
-export { LoginForms, user, setUser }
+export { LoginForms }

@@ -15,8 +15,11 @@ userRouter.put('/', async (request, response) => {
   const body = request.body
 
   const existingUser = await User.findById(user.id)
-  if (existingUser.userName !== user.userName)
-    return response.status(400).json({ error: 'Username already exists' }).end()
+  if (!existingUser)
+    return response.status(404).json({ error: 'User not found' })
+
+  if (body.userName && body.userName !== user.userName)
+    return response.status(400).json({ error: 'Username cannot be changed' })
 
   let passwordHash = null
 
@@ -25,8 +28,9 @@ userRouter.put('/', async (request, response) => {
     passwordHash = await bcrypt.hash(body.password, saltRounds)
   }
 
-  user.saved = user.saved.map(saved => saved.id)
-  body.saved = body.saved.map(saved => saved.id)
+  const saved = Array.isArray(body.saved)
+    ? body.saved.map(item => item.id || item)
+    : user.saved.map(item => item.id || item)
 
   const newUserDetails = {
     firstName: body.firstName,
@@ -39,7 +43,7 @@ userRouter.put('/', async (request, response) => {
     followers: body.followers || user.followers || [],
     following: body.following || user.following || [],
     owner: body.owner || user.owner || [],
-    saved: body.saved || user.saved || [],
+    saved,
     left: body.left || user.left || []
   }
 

@@ -9,7 +9,7 @@ signinRouter.post('/', async (request, response) => {
   const user = await User.findOne({ userName })
   const passwordCorrect = user === null
     ? false
-    : bcrypt.compare(password, user.passwordHash)
+    : await bcrypt.compare(password, user.passwordHash)
 
   if (!(user && passwordCorrect)) {
     return response.status(401).json({
@@ -22,7 +22,7 @@ signinRouter.post('/', async (request, response) => {
     id: user._id,
   }
 
-  const token = jwt.sign(userForToken, process.env.SECRET)
+  const token = jwt.sign(userForToken, process.env.SECRET, { expiresIn: '7d' })
 
 
   response

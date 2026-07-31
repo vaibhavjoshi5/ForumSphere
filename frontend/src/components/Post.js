@@ -192,7 +192,7 @@ const Post = ({ post }) => {
     try {
       if (!following) {
         console.log('Following user:', post.postedBy.id)
-        const updatedUserData = await addFollower(user.token, post.postedBy.id)
+        await addFollower(user.token, post.postedBy.id)
         setFollowing(true)
         // Update userDetails with the populated response from backend
         const userFieldsResponse = await getUserFields()
@@ -200,7 +200,7 @@ const Post = ({ post }) => {
         console.log('Successfully followed user')
       } else {
         console.log('Unfollowing user:', post.postedBy.id)
-        const updatedUserData = await removeFollower(user.token, post.postedBy.id)
+        await removeFollower(user.token, post.postedBy.id)
         setFollowing(false)
         // Update userDetails with the populated response from backend
         const userFieldsResponse = await getUserFields()

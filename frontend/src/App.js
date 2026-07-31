@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
-import { Routes, Route, useNavigate, Navigate } from 'react-router-dom'
-import { LoginForms, user, setUser } from './components/Login'
+import { Routes, Route, Navigate } from 'react-router-dom'
+import { LoginForms } from './components/Login'
 import { Profile } from './components/User/Profile'
 import { Navbar } from './components/Navbar'
 import { MySubGreddiit } from './components/MySubGreddiits/MySubgreddiit'
@@ -71,22 +71,22 @@ const theme = createTheme({
 })
 
 const App = () => {
-  const navigate = useNavigate()
+  const [user, setUser] = useState(() => {
+    try {
+      return JSON.parse(window.localStorage.getItem('loggedUser'))
+    } catch {
+      window.localStorage.removeItem('loggedUser')
+      return null
+    }
+  })
   const [load, setLoad] = useState(true)
 
   useEffect(() => {
     setLoad(true)
-    const loggedUserJSON = window.localStorage.getItem('loggedUser')
-    if (loggedUserJSON)
-      setUser(JSON.parse(loggedUserJSON))
     setLoad(false)
   }, [])
 
-  useEffect(() => {
-    if (user === null) {
-      navigate('/signin')
-    }
-  }, [navigate])
+  const handleLogout = () => setUser(null)
 
   return (
     <ThemeProvider theme={theme}>
@@ -109,10 +109,10 @@ const App = () => {
               <Box sx={{ mt: 2, color: 'white', fontSize: '1.2rem' }}>Loading SocialHub...</Box>
             </Box> :
             <div>
-              <Navbar />
+              <Navbar user={user} onLogout={handleLogout} />
               <Routes>
                 <Route exact path='/profile' element={user ? <Profile /> : <Navigate replace to='/signin' />} />
-                <Route exact path='/signin' element={user ? <Navigate replace to='/profile' /> : <LoginForms />} />
+                <Route exact path='/signin' element={user ? <Navigate replace to='/profile' /> : <LoginForms onLogin={setUser} />} />
                 <Route exact path='/mysubgreddiits' element={user ? <MySubGreddiit /> : <Navigate replace to='/signin' />} />
                 <Route exact path='/mysubgreddiits/:id' element={user ? <></> : <Navigate replace to='/signin' />} />
                 <Route exact path='/mysubgreddiits/:id/users' element={user ? <MySubUsers /> : <Navigate replace to='/signin' />} />

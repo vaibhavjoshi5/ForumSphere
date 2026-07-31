@@ -19,6 +19,9 @@ const extractToken = (request, response, next) => {
 }
 
 const extractUser = async (request, response, next) => {
+  if (!request.token)
+    return response.status(401).json({ error: 'token missing or invalid' })
+
   const decodedToken = jwt.verify(request.token, process.env.SECRET)
   if (!decodedToken.id)
     return response.status(401).json({ error: 'token missing or invalid' })
@@ -30,6 +33,8 @@ const extractUser = async (request, response, next) => {
       model: 'User'
     }
   })
+  if (!request.user)
+    return response.status(401).json({ error: 'user no longer exists' })
 
   next()
 }
@@ -51,7 +56,7 @@ const errorHandler = (error, request, response, next) => {
     return response.status(401).json({ error: 'token expired' })
   }
 
-  next(error)
+  return response.status(500).json({ error: 'internal server error' })
 }
 
 module.exports = {

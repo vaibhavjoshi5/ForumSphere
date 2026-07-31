@@ -11,7 +11,6 @@ import Button from '@mui/material/Button'
 import MenuItem from '@mui/material/MenuItem'
 import AdbIcon from '@mui/icons-material/Adb'
 import LogoutIcon from '@mui/icons-material/Logout'
-import { user, setUser } from './Login'
 import { useNavigate, useMatch } from 'react-router-dom'
 
 import RedditIcon from '@mui/icons-material/Reddit'
@@ -23,7 +22,7 @@ import PendingActionsIcon from '@mui/icons-material/PendingActions'
 import BarChartIcon from '@mui/icons-material/BarChart'
 import ReportIcon from '@mui/icons-material/Report'
 
-const Navbar = () => {
+const Navbar = ({ user, onLogout }) => {
   const [anchorElNav, setAnchorElNav] = useState(null)
   const [subId, setSubId] = useState('')
   const navigate = useNavigate()
@@ -67,11 +66,11 @@ const Navbar = () => {
     setAnchorElNav(null)
   }
 
-  const handeLogout = event => {
+  const handleLogout = event => {
     event.preventDefault()
     window.localStorage.removeItem('loggedUser')
     navigate('/signin')
-    setUser(null)
+    onLogout()
   }
 
   const handleRedirect = (event, url) => {
@@ -278,7 +277,7 @@ const Navbar = () => {
                 background: 'rgba(255, 69, 0, 1)',
                 transform: 'scale(1.05)',
               }
-            }} endIcon={<LogoutIcon />} onClick={handeLogout}>
+            }} endIcon={<LogoutIcon />} onClick={handleLogout}>
               Logout
             </Button>:
               null
