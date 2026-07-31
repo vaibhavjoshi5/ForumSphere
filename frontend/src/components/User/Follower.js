@@ -18,7 +18,7 @@ import RecentActorsOutlinedIcon from '@mui/icons-material/RecentActorsOutlined'
 import ArrowForwardOutlinedIcon from '@mui/icons-material/ArrowForwardOutlined'
 import ArrowBackOutlinedIcon from '@mui/icons-material/ArrowBackOutlined'
 
-import { updateUser, updateFollowerByID, removeFollower as removeFollowerAPI, getUserFields } from '../../services/userFields'
+import { updateFollowerByID, removeFollower as removeFollowerAPI, getUserFields } from '../../services/userFields'
 
 const Followers = ({ initialUser, setInitialUser, refreshUserData }) => {
   const [open, setOpen] = useState(false)
@@ -30,12 +30,8 @@ const Followers = ({ initialUser, setInitialUser, refreshUserData }) => {
 
   const removeFollower = async deleteFollower => {
     try {
-      const finalUser = { ...initialUser }
-      finalUser.followers = initialUser.followers.filter(follower => (follower._id || follower.id).toString() !== (deleteFollower._id || deleteFollower.id).toString())
-      await updateUser(user.token, finalUser)
-      setInitialUser(finalUser)
-      await updateFollowerByID(user.token, deleteFollower._id || deleteFollower.id)
-      // Also refresh user data to ensure UI is updated
+      const updatedUser = await updateFollowerByID(user.token, deleteFollower._id || deleteFollower.id)
+      setInitialUser(updatedUser)
       if (refreshUserData) {
         await refreshUserData()
       }

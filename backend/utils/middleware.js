@@ -54,6 +54,8 @@ const errorHandler = (error, request, response, next) => {
     return response.status(401).json({ error: 'invalid token' })
   } else if (error.name === 'TokenExpiredError') {
     return response.status(401).json({ error: 'token expired' })
+  } else if (error.code === 11000) {
+    return response.status(409).json({ error: 'Username or email is already registered' })
   }
 
   return response.status(500).json({ error: 'internal server error' })

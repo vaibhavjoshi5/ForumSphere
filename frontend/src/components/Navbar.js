@@ -92,7 +92,7 @@ const Navbar = ({ user, onLogout }) => {
     }}>
       <Container maxWidth='xl'>
         <Toolbar disableGutters>
-          <Typography onClick={event => handleRedirect(event, '/profile')}>
+          <Typography onClick={event => handleRedirect(event, '/home')}>
             <IconButton sx={{
               display: { xs: 'none', md: 'flex' },
               color: 'white',

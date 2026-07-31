@@ -18,8 +18,11 @@ savedPostsRouter.put('/:id', async (request, response) => {
   const user = request.user
   const postId = request.params.id
 
-  user.saved = user.saved.filter(savedPost => savedPost.id !== postId)
-  const updatedUser = await User.findByIdAndUpdate(user.id, user, { new: true })
+  user.saved = user.saved.filter(savedPost => {
+    const savedId = savedPost.id || savedPost._id || savedPost
+    return savedId.toString() !== postId.toString()
+  })
+  const updatedUser = await user.save()
 
   response.status(200).json(updatedUser)
 })

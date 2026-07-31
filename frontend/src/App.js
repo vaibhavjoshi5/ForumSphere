@@ -112,7 +112,7 @@ const App = () => {
               <Navbar user={user} onLogout={handleLogout} />
               <Routes>
                 <Route exact path='/profile' element={user ? <Profile /> : <Navigate replace to='/signin' />} />
-                <Route exact path='/signin' element={user ? <Navigate replace to='/profile' /> : <LoginForms onLogin={setUser} />} />
+                <Route exact path='/signin' element={user ? <Navigate replace to='/home' /> : <LoginForms onLogin={setUser} />} />
                 <Route exact path='/mysubgreddiits' element={user ? <MySubGreddiit /> : <Navigate replace to='/signin' />} />
                 <Route exact path='/mysubgreddiits/:id' element={user ? <></> : <Navigate replace to='/signin' />} />
                 <Route exact path='/mysubgreddiits/:id/users' element={user ? <MySubUsers /> : <Navigate replace to='/signin' />} />
@@ -120,9 +120,10 @@ const App = () => {
                 <Route exact path='/mysubgreddiits/:id/stats' element={user ? <MySubStats /> : <Navigate replace to='/signin' />} />
                 <Route exact path='/mysubgreddiits/:id/reports' element={user ? <MySubReports /> : <Navigate replace to='/signin' />} />
                 <Route exact path='/allsubgreddiits' element={user ? <AllSubGreddiits /> : <Navigate replace to='/signin' />} />
+                <Route exact path='/home' element={user ? <AllSubGreddiits /> : <Navigate replace to='/signin' />} />
                 <Route exact path='/allsubgreddiits/:id' element={user ? <AllSubGreddiitPage /> : <Navigate replace to='/signin' />} />
                 <Route exact path='/savedposts' element={user ? <SavedPosts /> : <Navigate replace to='/signin' />} />
-                <Route path='*' element={user ? <Navigate replace to='/profile' /> : <Navigate replace to='/signin' />} />
+                <Route path='*' element={user ? <Navigate replace to='/home' /> : <Navigate replace to='/signin' />} />
               </Routes>
             </div>
         }
