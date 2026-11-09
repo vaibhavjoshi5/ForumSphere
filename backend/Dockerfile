@@ -1,4 +1,4 @@
-FROM node:16-alpine
+FROM node:22-alpine
 
 RUN apk add python3 make g++ 
 
@@ -9,7 +9,7 @@ WORKDIR /home/node/app
 
 COPY --chown=node:node package*.json ./
 
-RUN npm i
+RUN npm ci --omit=dev
 
 COPY --chown=node:node . ./
 

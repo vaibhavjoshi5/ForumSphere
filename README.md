@@ -1,34 +1,26 @@
 # ForumSphere
 
-ForumSphere is a full-stack community platform built with React, Node.js, Express, and MongoDB.
+Community discussion platform built with React, Express, and MySQL.
 
-## Local development
+## Local setup
 
-1. Copy `.env.example` to `backend/.env` and update the values.
-2. Start MongoDB locally (or provide a MongoDB Atlas connection string).
-3. Install and run the API:
+Create a MySQL database and dedicated account. Copy .env.example to backend/.env,
+set the database credentials and SECRET, then run npm ci and npm run dev from
+backend. The API creates its tables on first connection. In frontend run
+npm install and npm start. The frontend proxies local API requests to port 3001.
 
-   ```bash
-   cd backend
-   npm install
-   npm run dev
-   ```
+For Docker Compose, copy .env.example to .env at the repo root, set the database
+passwords and SECRET, then run docker compose up --build and open http://localhost:8080.
 
-4. In another terminal, install and run the React app:
+For Aiven or another managed MySQL service, configure MYSQL_HOST, MYSQL_PORT,
+MYSQL_DATABASE, MYSQL_USER, MYSQL_PASSWORD, MYSQL_SSL=true, and MYSQL_SSL_CA.
+Set SECRET on the backend and REACT_APP_API_URL on the frontend when hosted separately.
 
-   ```bash
-   cd frontend
-   npm install
-   npm start
-   ```
+## Import existing records
 
-The frontend runs on port 3000 and proxies API requests to the backend on port 3001.
-
-## Verification
-
-```bash
-cd backend && npm test
-cd frontend && npm run build
-```
-
-The API also exposes `GET /api/health` for health checks.
+Pause legacy writes. Export users, subgreddiits, posts, and reports with
+mongoexport --jsonArray into a private directory outside the repo. Name the files
+users.json, subgreddiits.json, posts.json, and reports.json. Run
+node scripts/import-legacy.js <export-directory> from backend against an empty
+MySQL database. The import preserves IDs and password hashes and rolls back on
+error. Verify the imported data before switching traffic.

@@ -1,52 +1,37 @@
-version: '3.1'
-
 services:
-    mongodb:
-      image: mongo:5.0
-      container_name: mongodb
-      restart: unless-stopped
-      ports:
-        - 27017:27017
-      volumes:
-        - mongodb_data:/data/db
-      networks:
-        - web-network
-
-    backend:
-      build: ./backend
-      environment:
-        - PORT=3001
-        - MONGODB_URI=mongodb://mongodb:27017/socialhub
-      restart: unless-stopped
-      depends_on:
-        - mongodb
-      networks:
-        - web-network
-
-
-    frontend:
-      build: ./frontend
-      environment:
-        - PORT=3000
-      networks:
-        - web-network
-    nginx:
-      image: nginx
-      container_name: webserver
-      restart: unless-stopped
-      depends_on:
-        - backend
-        - frontend
-      ports:
-        - 8080:8080
-      volumes:
-        - ./nginx/local.conf:/etc/nginx/nginx.conf
-      networks:
-        - web-network
-
-networks:
-  web-network:
-    driver: bridge
-
+  mysql:
+    image: mysql:8.4
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:?Set MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-forumsphere}
+      MYSQL_USER: ${MYSQL_USER:-forumsphere}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:?Set MYSQL_PASSWORD}
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+  backend:
+    build: ./backend
+    environment:
+      PORT: 3001
+      MYSQL_HOST: mysql
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-forumsphere}
+      MYSQL_USER: ${MYSQL_USER:-forumsphere}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:?Set MYSQL_PASSWORD}
+      SECRET: ${SECRET:?Set SECRET}
+    depends_on:
+      mysql:
+        condition: service_healthy
+  frontend:
+    build: ./frontend
+  nginx:
+    image: nginx
+    depends_on: [backend, frontend]
+    ports: ["8080:8080"]
+    volumes:
+      - ./nginx/local.conf:/etc/nginx/nginx.conf:ro
 volumes:
-  mongodb_data:
+  mysql_data:

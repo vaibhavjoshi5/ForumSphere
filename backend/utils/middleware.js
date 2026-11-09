@@ -5,7 +5,7 @@ const jwt = require('jsonwebtoken')
 const requestLogger = (request, response, next) => {
   logger.info('Method:', request.method)
   logger.info('Path:  ', request.path)
-  logger.info('Body:  ', request.body)
+
   logger.info('---')
   next()
 }
@@ -54,7 +54,9 @@ const errorHandler = (error, request, response, next) => {
     return response.status(401).json({ error: 'invalid token' })
   } else if (error.name === 'TokenExpiredError') {
     return response.status(401).json({ error: 'token expired' })
-  } else if (error.code === 11000) {
+  } else if (error.name === 'WriteConflictError') {
+    return response.status(409).json({ error: error.message })
+  } else if (error.code === 'ER_DUP_ENTRY') {
     return response.status(409).json({ error: 'Username or email is already registered' })
   }
 

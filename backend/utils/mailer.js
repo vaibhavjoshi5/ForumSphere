@@ -10,6 +10,7 @@ const transporter = nodemailer.createTransport({
 })
 
 const mailFn = (recipient, action, data) => {
+  if (!config.NODEMAILER_USER || !config.NODEMAILER_PASS) return
   const mailData = {
     from: config.NODEMAILER_USER,
     to: recipient,
@@ -17,7 +18,7 @@ const mailFn = (recipient, action, data) => {
     text: data
   }
 
-  transporter.sendMail(mailData)
+  transporter.sendMail(mailData).catch(error => console.error('Unable to send moderation email:', error.code || error.name))
 }
 
 module.exports = { mailFn }

@@ -8,7 +8,7 @@ const server = http.createServer(app)
 
 const start = async () => {
   if (!process.env.SECRET)
-    throw new Error('MONGODB_URI and SECRET environment variables are required')
+    throw new Error('SECRET environment variable is required')
 
   await connectDB()
 

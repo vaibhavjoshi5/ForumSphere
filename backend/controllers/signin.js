@@ -19,7 +19,7 @@ signinRouter.post('/', async (request, response) => {
 
   const userForToken = {
     userName: user.userName,
-    id: user._id,
+    id: user.id,
   }
 
   const token = jwt.sign(userForToken, process.env.SECRET, { expiresIn: '7d' })

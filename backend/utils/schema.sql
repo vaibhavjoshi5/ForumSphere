@@ -1,0 +1,63 @@
+CREATE TABLE IF NOT EXISTS users (
+  id VARCHAR(36) PRIMARY KEY,
+  revision INT UNSIGNED NOT NULL DEFAULT 0,
+  firstName VARCHAR(255) NOT NULL,
+  lastName VARCHAR(255) NOT NULL,
+  userName VARCHAR(191) NOT NULL UNIQUE,
+  email VARCHAR(254) NOT NULL UNIQUE,
+  age INT NOT NULL,
+  contactNumber VARCHAR(64) NOT NULL,
+  passwordHash VARCHAR(255),
+  followers JSON NOT NULL,
+  following JSON NOT NULL,
+  owner JSON NOT NULL,
+  saved JSON NOT NULL,
+  `left` JSON NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS communities (
+  id VARCHAR(36) PRIMARY KEY,
+  revision INT UNSIGNED NOT NULL DEFAULT 0,
+  name VARCHAR(255) NOT NULL,
+  description TEXT,
+  tags JSON NOT NULL,
+  bannedKeywords JSON NOT NULL,
+  creator VARCHAR(36) NOT NULL,
+  members JSON NOT NULL,
+  blocked JSON NOT NULL,
+  requests JSON NOT NULL,
+  posts JSON NOT NULL,
+  reports JSON NOT NULL,
+  creationDate DATETIME(3),
+  imageUrl TEXT,
+  FOREIGN KEY (creator) REFERENCES users(id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS posts (
+  id VARCHAR(36) PRIMARY KEY,
+  revision INT UNSIGNED NOT NULL DEFAULT 0,
+  text TEXT NOT NULL,
+  postedBy VARCHAR(36) NOT NULL,
+  postedIn VARCHAR(36) NOT NULL,
+  upvotes INT,
+  downvotes INT,
+  replies JSON NOT NULL,
+  upvotedBy JSON NOT NULL,
+  downvotedBy JSON NOT NULL,
+  FOREIGN KEY (postedBy) REFERENCES users(id),
+  FOREIGN KEY (postedIn) REFERENCES communities(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS reports (
+  id VARCHAR(36) PRIMARY KEY,
+  revision INT UNSIGNED NOT NULL DEFAULT 0,
+  reportedBy VARCHAR(36) NOT NULL,
+  reportedUser VARCHAR(36) NOT NULL,
+  concern TEXT NOT NULL,
+  postId VARCHAR(36) NOT NULL,
+  action VARCHAR(255),
+  reportedDate DATETIME(3),
+  FOREIGN KEY (reportedBy) REFERENCES users(id),
+  FOREIGN KEY (reportedUser) REFERENCES users(id),
+  FOREIGN KEY (postId) REFERENCES posts(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

@@ -1,48 +1,9 @@
-const mongoose = require('mongoose')
+const defineModel = require('./record')
 
-const postSchema = new mongoose.Schema({
-  text: {
-    type: String,
-    required: [true, 'Post data must not be empty']
-  },
-  postedBy: {
-    type: mongoose.Schema.Types.ObjectId,
-    required: [true, 'Posting user id must not be empty']
-  },
-  postedIn: {
-    type: mongoose.Schema.Types.ObjectId,
-    required: [true, 'SubGreddiit id must not be empty']
-  },
-  upvotes: Number,
-  downvotes: Number,
-  replies: [
-    {
-      type: String
-    }
-  ],
-  upvotedBy: [
-    {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'User'
-    }
-  ],
-  downvotedBy: [
-    {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'User'
-    }
-  ]
+module.exports = defineModel('Post', 'posts', [
+  'text', 'postedBy', 'postedIn', 'upvotes', 'downvotes', 'replies', 'upvotedBy', 'downvotedBy'
+], {
+  arrays: ['replies', 'upvotedBy', 'downvotedBy'],
+  references: { postedBy: 'User', postedIn: 'Community', upvotedBy: 'User', downvotedBy: 'User' },
+  required: ['text', 'postedBy', 'postedIn']
 })
-
-postSchema.set('toJSON', {
-  transform: (document, returnedObject) => {
-    if (returnedObject._id)
-      returnedObject.id = returnedObject._id.toString()
-    delete returnedObject._id
-    delete returnedObject.__v
-  }
-})
-
-const Post = mongoose.model('Post', postSchema)
-
-module.exports = Post

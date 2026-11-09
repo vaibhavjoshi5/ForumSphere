@@ -1,4 +1,5 @@
 const mySubgreddiitRouter = require('express').Router()
+const db = require('../utils/db')
 const Report = require('../models/report')
 const mySubgreddiit = require('../models/subGreddiit')
 const User = require('../models/user')
@@ -55,8 +56,8 @@ mySubgreddiitRouter.get('/:id/reports', async (request, response) => {
 
   if (request.user.id === mySubGreddiitPage.creator.toString() || mySubGreddiitPage.members.find(member => member.toString() === request.user.id) !== undefined) {
     const presentDate = new Date()
-    mySubGreddiitPage.requests = mySubGreddiitPage.requests.filter(request => presentDate.getTime() - request.requestDate.getTime() <= config.REQUEST_EXPIRATION_DAYS || !request.rejected)
-    mySubGreddiitPage.reports = mySubGreddiitPage.reports.filter(report => presentDate.getTime() - report.reportedDate.getTime() <= config.REPORT_EXPIRATION_DAYS)
+    mySubGreddiitPage.requests = mySubGreddiitPage.requests.filter(request => presentDate.getTime() - request.requestDate.getTime() <= (Number(config.REQUEST_EXPIRATION_DAYS) || 7) * 86400000 || !request.rejected)
+    mySubGreddiitPage.reports = mySubGreddiitPage.reports.filter(report => presentDate.getTime() - report.reportedDate.getTime() <= (Number(config.REPORT_EXPIRATION_DAYS) || 7) * 86400000)
     const updatedMySubGreddiitPage = await mySubgreddiit.findByIdAndUpdate(request.params.id, mySubGreddiitPage, { new: true })
       .populate('creator').populate('members').populate('blocked').populate('reports')
       .populate({
@@ -122,9 +123,12 @@ mySubgreddiitRouter.post('/', async (request, response) => {
     imageUrl: body.imageUrl || ''
   })
 
-  const createdMySubgreddiit = await newMySubGreddiit.save()
-  user.owner = user.owner.concat(createdMySubgreddiit.id)
-  await user.save()
+  const createdMySubgreddiit = await db.inTransaction(async () => {
+    await newMySubGreddiit.save()
+    user.owner = user.owner.concat(newMySubGreddiit.id)
+    await user.save()
+    return newMySubGreddiit
+  })
 
   response.status(201).json(createdMySubgreddiit)
 })
@@ -154,21 +158,18 @@ mySubgreddiitRouter.delete('/:id', async (request, response) => {
   const deleteSub = await mySubgreddiit.findById(subId)
 
   if (deleteSub.creator.toString() === user.id.toString()) {
-    const users = await User.find({})
-    users.forEach(async user => {
-      user.saved = user.saved.filter(savedPost => !deleteSub.posts.includes(savedPost))
-      user.left = user.left.filter(leftSub => leftSub.toString() !== deleteSub.id.toString())
-      await user.save()
+    await db.inTransaction(async () => {
+      const users = await User.find({})
+      for (const account of users) {
+        account.saved = account.saved.filter(postId => !deleteSub.posts.includes(postId))
+        account.left = account.left.filter(communityId => communityId !== deleteSub.id)
+        account.owner = account.owner.filter(communityId => communityId !== deleteSub.id)
+        await account.save()
+      }
+      await mySubgreddiit.findByIdAndDelete(deleteSub.id)
     })
 
-    user.owner = user.owner.filter(ownedSub => ownedSub.toString() !== deleteSub.id)
-
-    deleteSub.posts.forEach(async post => await Post.findByIdAndDelete(post))
-    deleteSub.reports.forEach(async report => await Report.findByIdAndDelete(report))
-
-    await mySubgreddiit.findByIdAndDelete(deleteSub.id)
-
-    response.status(200)
+    response.sendStatus(200)
   } else
     response.status(403).json({ error: 'Invalid user! Not enough permissions' }).end()
 })
@@ -245,90 +246,54 @@ mySubgreddiitRouter.put('/:id/requests', async (request, response) => {
 })
 
 mySubgreddiitRouter.put('/:id/reports', async (request, response) => {
-  const subId = request.params.id
-  const reportObj = request.body
+  const { id, action } = request.body
+  const community = await mySubgreddiit.findById(request.params.id).populate('reports')
+  if (!community)
+    return response.status(404).json({ error: 'Community not found' })
+  if (community.creator !== request.user.id)
+    return response.status(403).json({ error: 'Invalid user' })
+  const report = community.reports.find(item => item.id === id)
+  if (!report)
+    return response.status(404).json({ error: 'Missing report' })
+  if (!['Ignore', 'Block User', 'Delete Post'].includes(action))
+    return response.status(400).json({ error: 'Invalid report action' })
 
-  const reportSub = await mySubgreddiit.findById(subId).populate('reports')
-  const savedReport = await Report.findByIdAndUpdate(reportObj.id, reportObj, { new: true })
-  const reportedPost = await Post.findById(savedReport.postId)
-  const reportedUser = await User.findById(savedReport.reportedUser)
+  const post = await Post.findById(report.postId)
+  const reportedUser = await User.findById(report.reportedUser)
+  const reporter = await User.findById(report.reportedBy)
 
-  if (reportSub.creator.toString() === request.user.id) {
-    if (savedReport.action === 'Block User') {
-      if (reportSub.blocked.find(block => block.toString() === savedReport.reportedUser.toString()) === undefined)
-        reportSub.blocked = reportSub.blocked.concat(savedReport.reportedUser)
-
-      reportSub.members = reportSub.members.filter(member => member.toString() !== savedReport.reportedUser.toString())
-
-      if (reportedUser.left.find(leftSub => leftSub.toString() === reportSub.id.toString()) === undefined)
-        reportedUser.left = reportedUser.left.concat(reportSub.id)
-      reportedUser.saved = reportedUser.saved.filter(savedPost => reportSub.posts.find(post => post.toString() === savedPost.toString()) === undefined)
+  const updated = await db.inTransaction(async () => {
+    if (action === 'Block User') {
+      if (!community.blocked.includes(reportedUser.id)) community.blocked.push(reportedUser.id)
+      community.members = community.members.filter(member => member !== reportedUser.id)
+      if (!reportedUser.left.includes(community.id)) reportedUser.left.push(community.id)
+      reportedUser.saved = reportedUser.saved.filter(postId => !community.posts.includes(postId))
       await reportedUser.save()
+      await community.save()
     }
-
-    else if (savedReport.action === 'Delete Post') {
-      const users = await User.find({})
-      users.forEach(async user => {
-        user.saved = user.saved.filter(savedPost => savedPost.toString() !== savedReport.postId.toString())
+    if (action === 'Delete Post') {
+      for (const user of await User.find({})) {
+        user.saved = user.saved.filter(postId => postId !== post.id)
         await user.save()
-      })
-
-      reportSub.posts = reportSub.posts.filter(post => post.toString() !== savedReport.postId.toString())
-      await reportSub.save()
-
-      await Post.findByIdAndDelete(savedReport.postId)
+      }
+      community.posts = community.posts.filter(postId => postId !== post.id)
+      community.reports = community.reports.filter(item => item.postId !== post.id)
+      await community.save()
+      await Post.findByIdAndDelete(post.id)
+    } else {
+      report.action = action
+      await report.save()
     }
+    return mySubgreddiit.findById(community.id).populate({
+      path: 'reports',
+      populate: [{ path: 'reportedBy' }, { path: 'reportedUser' }, { path: 'postId' }]
+    })
+  })
 
-    const findReport = reportSub.reports.find(report => report.reportedBy.toString() === savedReport.reportedBy.toString() && report.postId.toString() === savedReport.postId.toString())
-
-    if (findReport !== undefined) {
-      reportSub.reports = reportSub.reports.map(report => (report.reportedBy === savedReport.reportedBy && report.postId === savedReport.postId) ? savedReport : report)
-
-      if (savedReport.action === 'Delete Post') {
-        reportSub.reports = reportSub.reports.filter(report => report.id !== savedReport.id)
-        await Report.findByIdAndDelete(savedReport.id)
-      }
-
-      const updatedReportSub = await mySubgreddiit.findByIdAndUpdate(reportSub.id, reportSub, { new: true })
-        .populate({
-          path: 'reports',
-          populate: [
-            {
-              path: 'reportedBy',
-              model: 'User',
-            },
-            {
-              path: 'reportedUser',
-              model: 'User'
-            },
-            {
-              path: 'postId',
-              model: 'Post'
-            }
-          ]
-        })
-      response.status(201).json(updatedReportSub)
-
-      if (reportObj.action === 'Ignore') {
-        const responseText = `Your report on the post \n"${reportedPost.text}"\nhas been ignored!`
-        mailer.mailFn(request.user.email, reportObj.action, responseText)
-      } else if (reportObj.action === 'Block User') {
-        const reporterResponseText = `The user "${reportedUser.userName}" has been blocked from the subgreddiit for posting the post \n"${reportedPost.text}"\n`
-        mailer.mailFn(request.user.email, reportObj.action, reporterResponseText)
-
-        const reportedUserResponseText = `You have been blocked from the subgreddiit for posting the post \n"${reportedPost.text}"\n`
-        mailer.mailFn(reportedUser.email, reportObj.action, reportedUserResponseText)
-      } else if (reportObj.action === 'Delete Post') {
-        const reporterResponseText = `The post \n"${reportedPost.text}"\nhas been deleted from the subgreddiit`
-        mailer.mailFn(request.user.email, reportObj.action, reporterResponseText)
-
-        const reportedUserResponseText = `Your post \n"${reportedPost.text}"\nhas been deleted from the subgreddiit`
-        mailer.mailFn(reportedUser.email, reportObj.action, reportedUserResponseText)
-      }
-    } else
-      response.status(400).json({ error: 'Missing report' }).end()
-  } else
-    response.status(403).json({ error: 'Invalid user' }).end()
+  response.status(201).json(updated)
+  const message = action + ': ' + post.text
+  mailer.mailFn(reporter.email, action, message)
+  if (action !== 'Ignore') mailer.mailFn(reportedUser.email, action, message)
 })
 
 module.exports = mySubgreddiitRouter

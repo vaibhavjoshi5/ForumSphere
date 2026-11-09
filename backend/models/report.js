@@ -1,35 +1,8 @@
-const mongoose = require('mongoose')
+const defineModel = require('./record')
 
-const reportSchema = new mongoose.Schema({
-  reportedBy: {
-    type: mongoose.SchemaTypes.ObjectId,
-    ref: 'User'
-  },
-  reportedUser: {
-    type: mongoose.SchemaTypes.ObjectId,
-    ref: 'User'
-  },
-  concern: {
-    type: String,
-    required: [true, 'Concern must not be empty']
-  },
-  postId: {
-    type: mongoose.SchemaTypes.ObjectId,
-    ref: 'Post'
-  },
-  action: String,
-  reportedDate: Date
+module.exports = defineModel('Report', 'reports', [
+  'reportedBy', 'reportedUser', 'concern', 'postId', 'action', 'reportedDate'
+], {
+  references: { reportedBy: 'User', reportedUser: 'User', postId: 'Post' },
+  required: ['reportedBy', 'reportedUser', 'concern', 'postId']
 })
-
-reportSchema.set('toJSON', {
-  transform: (document, returnedObject) => {
-    if (returnedObject._id)
-      returnedObject.id = returnedObject._id.toString()
-    delete returnedObject._id
-    delete returnedObject.__v
-  }
-})
-
-const Report = mongoose.model('Report', reportSchema)
-
-module.exports = Report

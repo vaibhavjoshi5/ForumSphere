@@ -1,72 +1,10 @@
-const mongoose = require('mongoose')
+const defineModel = require('./record')
 
-const subGreddiit = new mongoose.Schema({
-  name: {
-    type: String,
-    required: [true, 'Name must not be empty']
-  },
-  description: String,
-  tags: [
-    {
-      type: String
-    }
-  ],
-  bannedKeywords: [
-    {
-      type: String
-    }
-  ],
-  creator: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User'
-  },
-  members: [
-    {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'User'
-    }
-  ],
-  blocked: [
-    {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'User'
-    }
-  ],
-  requests: [
-    {
-      userDetails: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'User'
-      },
-      requestDate: Date,
-      rejected: Boolean
-    }
-  ],
-  posts: [
-    {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'Post'
-    }
-  ],
-  reports: [
-    {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'Report'
-    }
-  ],
-  creationDate: Date,
-  imageUrl: String
+module.exports = defineModel('Community', 'communities', [
+  'name', 'description', 'tags', 'bannedKeywords', 'creator', 'members', 'blocked',
+  'requests', 'posts', 'reports', 'creationDate', 'imageUrl'
+], {
+  arrays: ['tags', 'bannedKeywords', 'members', 'blocked', 'requests', 'posts', 'reports'],
+  references: { creator: 'User', members: 'User', blocked: 'User', posts: 'Post', reports: 'Report' },
+  required: ['name', 'creator']
 })
-
-subGreddiit.set('toJSON', {
-  transform: (document, returnedObject) => {
-    if (returnedObject._id)
-      returnedObject.id = returnedObject._id.toString()
-    delete returnedObject._id
-    delete returnedObject.__v
-  }
-})
-
-const SubGreddiit = mongoose.model('SubGreddiit', subGreddiit)
-
-module.exports = SubGreddiit

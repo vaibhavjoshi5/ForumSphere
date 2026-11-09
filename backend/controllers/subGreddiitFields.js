@@ -1,5 +1,6 @@
 const subgreddiitRouter = require('express').Router()
 const Subgreddiit = require('../models/subGreddiit')
+const db = require('../utils/db')
 const Post = require('../models/post')
 const Report = require('../models/report')
 const config = require('../utils/config')
@@ -27,7 +28,7 @@ subgreddiitRouter.get('/:id', async (request, response) => {
   const subGreddiitPage = await Subgreddiit.findById(request.params.id).populate('requests')
 
   const presentDate = new Date()
-  subGreddiitPage.requests = subGreddiitPage.requests.filter(request => presentDate.getTime() - request.requestDate.getTime() <= config.REQUEST_EXPIRATION_DAYS || !request.rejected)
+  subGreddiitPage.requests = subGreddiitPage.requests.filter(request => presentDate.getTime() - request.requestDate.getTime() <= (Number(config.REQUEST_EXPIRATION_DAYS) || 7) * 86400000 || !request.rejected)
   subGreddiitPage.requests = subGreddiitPage.requests.map(request => {
     return (
       {
@@ -123,35 +124,33 @@ subgreddiitRouter.put('/:id', async (request, response) => {
 })
 
 subgreddiitRouter.post('/:id/reports', async (request, response) => {
-  const user = request.user
-  const subId = request.params.id
-  const reportObj = request.body
+  const userId = request.user.id
+  const { postId, concern } = request.body
+  const community = await Subgreddiit.findById(request.params.id).populate('reports')
+  if (!community)
+    return response.status(404).json({ error: 'Community not found' })
+  if (community.creator !== userId && !community.members.includes(userId))
+    return response.status(403).json({ error: 'Join the community to report a post' })
 
-  const reportSub = await Subgreddiit.findById(subId)
+  const post = await Post.findById(postId)
+  if (!post || post.postedIn !== community.id)
+    return response.status(404).json({ error: 'Post not found' })
+  if (post.postedBy === community.creator || post.postedBy === userId)
+    return response.status(403).json({ error: 'Cannot report owner or yourself' })
+  if (community.reports.some(report => report.reportedBy === userId && report.postId === post.id))
+    return response.status(403).json({ error: 'Already reported' })
 
-  if (reportSub.creator.toString() === request.user.id.toString() || reportSub.members.find(member => member.toString() === request.user.id.toString()) !== undefined) {
-    const newReport = new Report({
-      reportedBy: user.id,
-      reportedUser: reportObj.reportedUser,
-      concern: reportObj.concern,
-      postId: reportObj.postId,
-      action: '',
-      reportedDate: new Date()
-    })
-
-    const savedReport = await newReport.save()
-
-    if (reportSub.reports.find(report => report.reportedBy === savedReport.reportedBy && report.postId === savedReport.postId) === undefined) {
-      if (savedReport.reportedUser !== reportSub.creator.id && savedReport.reportedUser.toString() !== user.id) {
-        reportSub.reports = reportSub.reports.concat(savedReport.id)
-        const updatedReportSub = await Subgreddiit.findByIdAndUpdate(reportSub.id, reportSub, { new: true })
-        response.status(201).json(updatedReportSub)
-      } else
-        response.status(403).json({ error: 'Cannot report owner or yourself' }).end()
-    } else
-      response.status(403).json({ error: 'Already reported' }).end()
-  } else
-    response.status(403).json({ error: 'Cannot report posts in the subgreddiit without being its member' }).end()
+  const report = new Report({
+    reportedBy: userId, reportedUser: post.postedBy, postId: post.id,
+    concern, action: '', reportedDate: new Date()
+  })
+  const updated = await db.inTransaction(async () => {
+    await report.save()
+    community.reports.push(report.id)
+    await community.save()
+    return Subgreddiit.findById(community.id)
+  })
+  response.status(201).json(updated)
 })
 
 module.exports = subgreddiitRouter
