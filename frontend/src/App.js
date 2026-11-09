@@ -118,7 +118,7 @@ const App = () => {
               flexDirection: 'column'
             }}>
               <CircularProgress size={60} thickness={4} />
-              <Box sx={{ mt: 2, color: 'white', fontSize: '1.2rem' }}>Loading SocialHub...</Box>
+              <Box sx={{ mt: 2, color: 'white', fontSize: '1.2rem' }}>Loading ForumSphere...</Box>
             </Box> :
             <div>
               <Navbar user={user} onLogout={handleLogout} />

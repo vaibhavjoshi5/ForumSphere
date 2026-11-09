@@ -1,7 +1,7 @@
 {
-  "name": "socialhub-backend",
+  "name": "forumsphere-backend",
   "version": "1.0.0",
-  "description": "Backend for SocialHub application",
+  "description": "Backend for ForumSphere application",
   "main": "index.js",
   "scripts": {
     "start": "cross-env NODE_ENV=production node index.js",

@@ -1,6 +1,6 @@
-# SocialHub
+# ForumSphere
 
-SocialHub is a full-stack community platform built with React, Node.js, Express, and MongoDB.
+ForumSphere is a full-stack community platform built with React, Node.js, Express, and MongoDB.
 
 ## Local development
 

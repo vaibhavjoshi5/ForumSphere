@@ -106,7 +106,7 @@ const Navbar = ({ user, onLogout }) => {
                 color: '#ffeb3b',
               }
             }}
-            ><RedditIcon sx={{ mr: 1, fontSize: '2rem' }} />SocialHub</IconButton>
+            ><RedditIcon sx={{ mr: 1, fontSize: '2rem' }} />ForumSphere</IconButton>
           </Typography>
 
           {
@@ -178,7 +178,7 @@ const Navbar = ({ user, onLogout }) => {
             }}
             onClick={event => handleRedirect(event, '/profile')}
           >
-            SocialHub
+            ForumSphere
           </Typography>
 
           {

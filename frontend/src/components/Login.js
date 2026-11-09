@@ -94,7 +94,7 @@ const SignIn = ({ setSignInForm, onLogin, successMessage }) => {
               WebkitBackgroundClip: 'text',
               WebkitTextFillColor: 'transparent',
               mb: 2
-            }}>Sign In to SocialHub</Typography>
+            }}>Sign In to ForumSphere</Typography>
             <Box component='form' onSubmit={signIn} noValidate sx={{ mt: 1 }}>
               {successMessage && <Alert severity='success' sx={{ mb: 1 }}>{successMessage}</Alert>}
               {submitError && <Alert severity='error' sx={{ mb: 1 }}>{submitError}</Alert>}
@@ -259,7 +259,7 @@ const SignUp = ({ setSignInForm, onSignupSuccess }) => {
               mb: 1,
               textAlign: 'center'
             }}>
-              🔐 Join SocialHub
+              🔐 Join ForumSphere
             </Typography>
             <Typography variant='body1' sx={{ 
               color: '#666',
