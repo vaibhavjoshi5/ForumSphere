@@ -6,7 +6,7 @@ userRouter.get('/', async (request, response) => {
   const user = await User.findById(request.user.id)
     .populate('following', 'userName firstName lastName')
     .populate('followers', 'userName firstName lastName')
-    .populate('saved')
+    .populate({ path: 'saved', populate: { path: 'postedBy', model: 'User', select: 'userName' } })
   response.status(200).json(user)
 })
 

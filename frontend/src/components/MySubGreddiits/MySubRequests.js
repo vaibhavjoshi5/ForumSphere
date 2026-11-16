@@ -66,27 +66,28 @@ const MySubRequests = () => {
 
   return (
     <>
+      <Typography component='h1' variant='h4' fontWeight={800} sx={{ mb: 2 }}>Join requests</Typography>
       {loading && <Box sx={{ display: 'flex', justifyContent: 'center', mt: 6 }}><CircularProgress /></Box>}
       {error && <Alert severity='error' sx={{ m: 3 }}>{error}</Alert>}
       {
         mySubPage.id &&
         <Grid container spacing={2}>
-          <Grid item xs={12} sm={3}>
+          <Grid item xs={12} lg={8}>
             <Card variant='outlined'>
               <CardContent>
-                <Typography variant='h5' component='div'>Requests</Typography>
+                <Typography variant='h5' component='h2'>Pending requests</Typography>
                 {mySubPage.requests.length === 0 && <Typography color='text.secondary' sx={{ mt: 2 }}>No pending join requests.</Typography>}
                 <List component='div' disablePadding>
                   {
                     mySubPage.requests.map(
                       request => (
-                        <ListItem sx={{ pl: 4 }} key={request.userDetails.id}>
+                        <ListItem disableGutters sx={{ gap: 0.5, flexWrap: 'wrap' }} key={request.userDetails.id}>
                           <ListItemAvatar>
                             <Avatar><PersonIcon /></Avatar>
                           </ListItemAvatar>
-                          <ListItemText primary={request.userDetails.userName} />
-                          <Fab size='small' disabled={actionDisable} onClick={() => onClick(true, request.userDetails.id)} color='success' sx={{ margin: 1 }}><DoneIcon /></Fab>
-                          <Fab size='small' disabled={actionDisable} onClick={() => onClick(false, request.userDetails.id)} color='error' sx={{ margin: 1 }}><CloseIcon /></Fab>
+                          <ListItemText sx={{ overflowWrap: 'anywhere' }} primary={request.userDetails.userName} />
+                          <Fab size='small' aria-label={'Approve ' + request.userDetails.userName} disabled={actionDisable} onClick={() => onClick(true, request.userDetails.id)} color='success' sx={{ margin: 1 }}><DoneIcon /></Fab>
+                          <Fab size='small' aria-label={'Reject ' + request.userDetails.userName} disabled={actionDisable} onClick={() => onClick(false, request.userDetails.id)} color='error' sx={{ margin: 1 }}><CloseIcon /></Fab>
                         </ListItem>
                       )
                     )

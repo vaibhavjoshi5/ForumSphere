@@ -147,12 +147,12 @@ const Profile = () => {
     <div style={{ 
       minHeight: '100vh', 
       background: 'transparent',
-      padding: '20px'
+      padding: '0'
     }}>
       {
         initialUser.userName ?
           <ThemeProvider theme={theme}>
-            <Container component='main' maxWidth='md'>
+            <Container disableGutters maxWidth='md'>
               <CssBaseline />
               <Box sx={{ 
                 display: 'flex', 
@@ -160,28 +160,21 @@ const Profile = () => {
                 alignItems: 'center',
                 mb: 4
               }}>
-                <h1 style={{ 
-                  textAlign: 'center', 
-                  color: 'white', 
-                  fontSize: '2.5rem',
-                  fontWeight: 'bold',
-                  textShadow: '2px 2px 4px rgba(0,0,0,0.5)',
-                  marginBottom: '30px'
-                }}>
-                  👤 User Profile 👤
-                </h1>
+                <Box sx={{ alignSelf: 'stretch', mb: 2 }}>
+                  <h1 style={{ margin: 0, color: '#172923', fontSize: '2rem' }}>Profile</h1>
+                  <p style={{ color: '#4e6259', margin: '4px 0 0' }}>Manage your account and personal information.</p>
+                </Box>
                 <Box 
                   component='form' 
                   noValidate 
                   onSubmit={onEdit} 
                   sx={{ 
                     mt: 2,
-                    p: 4,
-                    background: 'rgba(255, 255, 255, 0.95)',
+                    p: { xs: 2, sm: 4 },
+                    background: '#ffffff',
                     borderRadius: '20px',
-                    boxShadow: '0 20px 40px rgba(0, 0, 0, 0.1)',
-                    backdropFilter: 'blur(10px)',
-                    border: '1px solid rgba(255, 255, 255, 0.2)',
+
+                    border: '1px solid #dce5de',
                     width: '100%',
                     maxWidth: '800px'
                   }}
@@ -192,7 +185,7 @@ const Profile = () => {
                     marginBottom: '24px',
                     fontWeight: 'bold'
                   }}>
-                    ✏️ Personal Information
+                    Personal information
                   </h2>
                   <Grid container spacing={3}>
                     <Grid item xs={12} sm={6}>
@@ -214,10 +207,10 @@ const Profile = () => {
                             borderRadius: '12px',
                             backgroundColor: buttonType ? 'rgba(0, 0, 0, 0.05)' : 'white',
                             '&:hover fieldset': {
-                              borderColor: '#667eea',
+                              borderColor: '#205b47',
                             },
                             '&.Mui-focused fieldset': {
-                              borderColor: '#667eea',
+                              borderColor: '#205b47',
                             }
                           }
                         }}
@@ -242,10 +235,10 @@ const Profile = () => {
                             borderRadius: '12px',
                             backgroundColor: buttonType ? 'rgba(0, 0, 0, 0.05)' : 'white',
                             '&:hover fieldset': {
-                              borderColor: '#667eea',
+                              borderColor: '#205b47',
                             },
                             '&.Mui-focused fieldset': {
-                              borderColor: '#667eea',
+                              borderColor: '#205b47',
                             }
                           }
                         }}
@@ -270,10 +263,10 @@ const Profile = () => {
                             borderRadius: '12px',
                             backgroundColor: buttonType ? 'rgba(0, 0, 0, 0.05)' : 'white',
                             '&:hover fieldset': {
-                              borderColor: '#667eea',
+                              borderColor: '#205b47',
                             },
                             '&.Mui-focused fieldset': {
-                              borderColor: '#667eea',
+                              borderColor: '#205b47',
                             }
                           }
                         }}
@@ -298,10 +291,10 @@ const Profile = () => {
                             borderRadius: '12px',
                             backgroundColor: buttonType ? 'rgba(0, 0, 0, 0.05)' : 'white',
                             '&:hover fieldset': {
-                              borderColor: '#667eea',
+                              borderColor: '#205b47',
                             },
                             '&.Mui-focused fieldset': {
-                              borderColor: '#667eea',
+                              borderColor: '#205b47',
                             }
                           }
                         }}
@@ -326,10 +319,10 @@ const Profile = () => {
                             borderRadius: '12px',
                             backgroundColor: 'rgba(0, 0, 0, 0.05)',
                             '&:hover fieldset': {
-                              borderColor: '#667eea',
+                              borderColor: '#205b47',
                             },
                             '&.Mui-focused fieldset': {
-                              borderColor: '#667eea',
+                              borderColor: '#205b47',
                             }
                           }
                         }}
@@ -354,10 +347,10 @@ const Profile = () => {
                             borderRadius: '12px',
                             backgroundColor: buttonType ? 'rgba(0, 0, 0, 0.05)' : 'white',
                             '&:hover fieldset': {
-                              borderColor: '#667eea',
+                              borderColor: '#205b47',
                             },
                             '&.Mui-focused fieldset': {
-                              borderColor: '#667eea',
+                              borderColor: '#205b47',
                             }
                           }
                         }}
@@ -380,10 +373,10 @@ const Profile = () => {
                             borderRadius: '12px',
                             backgroundColor: buttonType ? 'rgba(0, 0, 0, 0.05)' : 'white',
                             '&:hover fieldset': {
-                              borderColor: '#667eea',
+                              borderColor: '#205b47',
                             },
                             '&.Mui-focused fieldset': {
-                              borderColor: '#667eea',
+                              borderColor: '#205b47',
                             }
                           }
                         }}
@@ -397,7 +390,7 @@ const Profile = () => {
                       variant='contained' 
                       disabled={(!firstName || !lastName || !userName || !email || (age.toString() === '') || !contactNumber || saveDisable) && !buttonType}
                       sx={{ 
-                        background: 'linear-gradient(45deg, #667eea 30%, #764ba2 90%)',
+                        background: '#205b47',
                         borderRadius: '25px',
                         padding: '12px 32px',
                         fontSize: '16px',
@@ -406,7 +399,7 @@ const Profile = () => {
                         textTransform: 'none',
                         boxShadow: '0 4px 15px rgba(102, 126, 234, 0.3)',
                         '&:hover': {
-                          background: 'linear-gradient(45deg, #5a67d8 30%, #6b46c1 90%)',
+                          background: '#174333',
                           boxShadow: '0 6px 20px rgba(102, 126, 234, 0.4)',
                           transform: 'translateY(-2px)',
                         },
@@ -431,8 +424,8 @@ const Profile = () => {
                           fontSize: '16px',
                           fontWeight: 'bold',
                           textTransform: 'none',
-                          borderColor: '#667eea',
-                          color: '#667eea',
+                          borderColor: '#205b47',
+                          color: '#205b47',
                           '&:hover': {
                             borderColor: '#5a67d8',
                             backgroundColor: 'rgba(102, 126, 234, 0.1)',

@@ -1,8 +1,8 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { Routes, Route, Navigate, useParams } from 'react-router-dom'
 import { LoginForms } from './components/Login'
 import { Profile } from './components/User/Profile'
-import { Navbar } from './components/Navbar'
+import { Navbar, WorkspaceNavigation } from './components/Navbar'
 import { MySubGreddiit } from './components/MySubGreddiits/MySubgreddiit'
 import { MySubUsers } from './components/MySubGreddiits/MySubUsers'
 import { MySubRequests } from './components/MySubGreddiits/MySubRequests'
@@ -11,63 +11,29 @@ import { MySubReports } from './components/MySubGreddiits/MySubReports'
 import { AllSubGreddiits } from './components/AllSubGreddiits/AllSubGreddiits'
 import { AllSubGreddiitPage } from './components/AllSubGreddiits/AllSubGreddiitPage'
 import { SavedPosts } from './components/User/SavedPosts'
-import CircularProgress from '@mui/material/CircularProgress'
 import Box from '@mui/material/Box'
+import Container from '@mui/material/Container'
 import { createTheme, ThemeProvider } from '@mui/material/styles'
 import CssBaseline from '@mui/material/CssBaseline'
 
 const theme = createTheme({
   palette: {
-    primary: {
-      main: '#1976d2',
-      light: '#42a5f5',
-      dark: '#1565c0',
-    },
-    secondary: {
-      main: '#dc004e',
-      light: '#ff5983',
-      dark: '#9a0036',
-    },
-    background: {
-      default: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-      paper: 'rgba(255, 255, 255, 0.95)',
-    },
+    primary: { main: '#205b47' },
+    background: { default: '#f5f7f4', paper: '#ffffff' },
+    text: { primary: '#172923', secondary: '#4e6259' },
+    divider: '#dce5de'
   },
+  shape: { borderRadius: 12 },
   typography: {
-    fontFamily: '"Roboto", "Helvetica", "Arial", sans-serif',
-    h1: {
-      fontWeight: 700,
-    },
-    h2: {
-      fontWeight: 600,
-    },
+    fontFamily: 'Inter, system-ui, sans-serif',
+    h1: { fontWeight: 800 },
+    h2: { fontWeight: 800 },
+    button: { fontWeight: 700, textTransform: 'none' }
   },
   components: {
-    MuiCard: {
-      styleOverrides: {
-        root: {
-          borderRadius: 16,
-          boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
-          backdropFilter: 'blur(10px)',
-          border: '1px solid rgba(255, 255, 255, 0.2)',
-        },
-      },
-    },
-    MuiButton: {
-      styleOverrides: {
-        root: {
-          borderRadius: 25,
-          textTransform: 'none',
-          fontWeight: 600,
-          transition: 'all 0.3s ease',
-          '&:hover': {
-            transform: 'translateY(-2px)',
-            boxShadow: '0 6px 20px rgba(0, 0, 0, 0.15)',
-          },
-        },
-      },
-    },
-  },
+    MuiButton: { defaultProps: { disableElevation: true } },
+    MuiCard: { defaultProps: { variant: 'outlined' } }
+  }
 })
 
 const CommunityRoute = ({ user, children }) => {
@@ -91,55 +57,36 @@ const App = () => {
       return null
     }
   })
-  const [load, setLoad] = useState(true)
-
-  useEffect(() => {
-    setLoad(true)
-    setLoad(false)
-  }, [])
-
   const handleLogout = () => setUser(null)
 
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
-      <Box sx={{ 
-        minHeight: '100vh',
-        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-        backgroundAttachment: 'fixed',
-      }}>
-        {
-          load ?
-            <Box sx={{ 
-              display: 'flex', 
-              justifyContent: 'center', 
-              alignItems: 'center', 
-              minHeight: '100vh',
-              flexDirection: 'column'
-            }}>
-              <CircularProgress size={60} thickness={4} />
-              <Box sx={{ mt: 2, color: 'white', fontSize: '1.2rem' }}>Loading ForumSphere...</Box>
-            </Box> :
-            <div>
-              <Navbar user={user} onLogout={handleLogout} />
-              <Routes>
-                <Route exact path='/profile' element={user ? <Profile /> : <Navigate replace to='/signin' />} />
-                <Route exact path='/signin' element={user ? <Navigate replace to='/home' /> : <LoginForms onLogin={setUser} />} />
-                <Route exact path='/mysubgreddiits' element={user ? <MySubGreddiit /> : <Navigate replace to='/signin' />} />
-                <Route exact path='/mysubgreddiits/:id' element={<CommunityRoute user={user}><Navigate replace to='users' /></CommunityRoute>} />
-                <Route exact path='/mysubgreddiits/:id/users' element={<CommunityRoute user={user}><MySubUsers /></CommunityRoute>} />
-                <Route exact path='/mysubgreddiits/:id/requests' element={<CommunityRoute user={user}><MySubRequests /></CommunityRoute>} />
-                <Route exact path='/mysubgreddiits/:id/stats' element={<CommunityRoute user={user}><MySubStats /></CommunityRoute>} />
-                <Route exact path='/mysubgreddiits/:id/reports' element={<CommunityRoute user={user}><MySubReports /></CommunityRoute>} />
-                <Route exact path='/allsubgreddiits' element={user ? <AllSubGreddiits /> : <Navigate replace to='/signin' />} />
-                <Route exact path='/home' element={user ? <AllSubGreddiits /> : <Navigate replace to='/signin' />} />
-                <Route exact path='/allsubgreddiits/:id' element={user ? <AllSubGreddiitPage /> : <Navigate replace to='/signin' />} />
-                <Route exact path='/savedposts' element={user ? <SavedPosts /> : <Navigate replace to='/signin' />} />
-                <Route path='*' element={user ? <Navigate replace to='/home' /> : <Navigate replace to='/signin' />} />
-              </Routes>
-            </div>
-        }
+      <Navbar user={user} onLogout={handleLogout} />
+      <Container maxWidth={user ? 'xl' : 'lg'} disableGutters={!user} sx={user ? {
+        py: { xs: 2.5, md: 4 }, display: 'grid',
+        gridTemplateColumns: { xs: 'minmax(0, 1fr)', md: '218px minmax(0, 1fr)' },
+        gap: { md: 3, lg: 4 }
+      } : undefined}>
+      {user && <WorkspaceNavigation />}
+      <Box component='main' sx={{ minWidth: 0 }}>
+      <Routes>
+        <Route exact path='/profile' element={user ? <Profile /> : <Navigate replace to='/signin' />} />
+        <Route exact path='/signin' element={user ? <Navigate replace to='/home' /> : <LoginForms onLogin={setUser} />} />
+        <Route exact path='/mysubgreddiits' element={user ? <MySubGreddiit /> : <Navigate replace to='/signin' />} />
+        <Route exact path='/mysubgreddiits/:id' element={<CommunityRoute user={user}><Navigate replace to='users' /></CommunityRoute>} />
+        <Route exact path='/mysubgreddiits/:id/users' element={<CommunityRoute user={user}><MySubUsers /></CommunityRoute>} />
+        <Route exact path='/mysubgreddiits/:id/requests' element={<CommunityRoute user={user}><MySubRequests /></CommunityRoute>} />
+        <Route exact path='/mysubgreddiits/:id/stats' element={<CommunityRoute user={user}><MySubStats /></CommunityRoute>} />
+        <Route exact path='/mysubgreddiits/:id/reports' element={<CommunityRoute user={user}><MySubReports /></CommunityRoute>} />
+        <Route exact path='/allsubgreddiits' element={user ? <AllSubGreddiits /> : <Navigate replace to='/signin' />} />
+        <Route exact path='/home' element={user ? <AllSubGreddiits /> : <Navigate replace to='/signin' />} />
+        <Route exact path='/allsubgreddiits/:id' element={user ? <AllSubGreddiitPage /> : <Navigate replace to='/signin' />} />
+        <Route exact path='/savedposts' element={user ? <SavedPosts /> : <Navigate replace to='/signin' />} />
+        <Route path='*' element={user ? <Navigate replace to='/home' /> : <Navigate replace to='/signin' />} />
+      </Routes>
       </Box>
+      </Container>
     </ThemeProvider>
   )
 }

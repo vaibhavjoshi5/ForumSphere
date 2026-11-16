@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom'
 import { signin, signup } from '../services/login'
 import Avatar from '@mui/material/Avatar'
 import Button from '@mui/material/Button'
-import CssBaseline from '@mui/material/CssBaseline'
 import TextField from '@mui/material/TextField'
 import Link from '@mui/material/Link'
 import Grid from '@mui/material/Grid'
@@ -13,9 +12,7 @@ import Typography from '@mui/material/Typography'
 import Container from '@mui/material/Container'
 import Alert from '@mui/material/Alert'
 import CircularProgress from '@mui/material/CircularProgress'
-import { createTheme, ThemeProvider } from '@mui/material/styles'
 
-const theme = createTheme()
 
 const SignIn = ({ setSignInForm, onLogin, successMessage }) => {
   const [userName, setUserName] = useState('')
@@ -64,76 +61,73 @@ const SignIn = ({ setSignInForm, onLogin, successMessage }) => {
   const passwordBlur = event => !event.target.value ? setPasswordError(true) : setPasswordError(false)
 
   return (
-    <div style={{ 
-      minHeight: '100vh', 
-      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+    <div style={{
+      minHeight: 'calc(100dvh - 68px)',
+      background: '#f5f7f4',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
       padding: '20px'
     }}>
-      <ThemeProvider theme={theme}>
-        <Container component='main' maxWidth='xs'>
-          <CssBaseline />
-          <Box sx={{ 
-            display: 'flex', 
-            flexDirection: 'column', 
-            alignItems: 'center',
-            background: 'rgba(255, 255, 255, 0.95)',
-            borderRadius: '20px',
-            padding: '40px',
-            boxShadow: '0 20px 40px rgba(0, 0, 0, 0.1)',
-            backdropFilter: 'blur(10px)',
-          }} >
-            <Avatar sx={{ 
-              m: 1, 
-              bgcolor: 'secondary.main',
-              width: 60,
-              height: 60,
-              background: 'linear-gradient(45deg, #FE6B8B 30%, #FF8E53 90%)'
-            }}><LockOutlinedIcon sx={{ fontSize: 30 }} /></Avatar>
-            <Typography component='h1' variant='h4' sx={{ 
+      <Container maxWidth='xs'>
+        <Box sx={{
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          background: 'rgba(255, 255, 255, 0.95)',
+          borderRadius: '20px',
+          p: { xs: 3, sm: 5 },
+          boxShadow: '0 20px 40px rgba(0, 0, 0, 0.1)',
+          backdropFilter: 'blur(10px)',
+        }} >
+          <Avatar sx={{
+            m: 1,
+            bgcolor: 'secondary.main',
+            width: 60,
+            height: 60,
+            background: '#205b47'
+          }}><LockOutlinedIcon sx={{ fontSize: 30 }} /></Avatar>
+          <Typography component='h1' variant='h4' sx={{
+            fontWeight: 'bold',
+            background: 'linear-gradient(45deg, #205b47, #34775d)',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
+            mb: 2
+          }}>Sign In to ForumSphere</Typography>
+          <Box component='form' onSubmit={signIn} noValidate sx={{ mt: 1 }}>
+            {successMessage && <Alert severity='success' sx={{ mb: 1 }}>{successMessage}</Alert>}
+            {submitError && <Alert severity='error' sx={{ mb: 1 }}>{submitError}</Alert>}
+            <TextField margin='normal' required fullWidth id='userName' label='Username or email' name='username' autoComplete='username'
+              value={userName} onChange={userNameChange} helperText={userNameError ? 'Enter your username or registered email' : ''} error={userNameError} onBlur={userNameBlur}
+              sx={{ '& .MuiOutlinedInput-root': { borderRadius: '12px' } }} />
+            <TextField margin='normal' required fullWidth name='password' label='Password' type='password' id='password' autoComplete='current-password'
+              value={password} onChange={passwordChange} helperText={passwordError ? 'Password is a required field' : ''} error={passwordError} onBlur={passwordBlur}
+              sx={{ '& .MuiOutlinedInput-root': { borderRadius: '12px' } }} />
+            <Button type='submit' fullWidth variant='contained' sx={{
+              mt: 3,
+              mb: 2,
+              borderRadius: '25px',
+              background: 'linear-gradient(45deg, #205b47, #34775d)',
+              height: '50px',
+              fontSize: '1.1rem',
               fontWeight: 'bold',
-              background: 'linear-gradient(45deg, #667eea 30%, #764ba2 90%)',
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
-              mb: 2
-            }}>Sign In to ForumSphere</Typography>
-            <Box component='form' onSubmit={signIn} noValidate sx={{ mt: 1 }}>
-              {successMessage && <Alert severity='success' sx={{ mb: 1 }}>{successMessage}</Alert>}
-              {submitError && <Alert severity='error' sx={{ mb: 1 }}>{submitError}</Alert>}
-              <TextField margin='normal' required fullWidth id='userName' label='Username or email' name='username' autoComplete='username'
-                value={userName} onChange={userNameChange} helperText={userNameError ? 'Username is a required field' : ''} error={userNameError} onBlur={userNameBlur} 
-                sx={{ '& .MuiOutlinedInput-root': { borderRadius: '12px' } }} />
-              <TextField margin='normal' required fullWidth name='password' label='Password' type='password' id='password' autoComplete='current-password'
-                value={password} onChange={passwordChange} helperText={passwordError ? 'Password is a required field' : ''} error={passwordError} onBlur={passwordBlur} 
-                sx={{ '& .MuiOutlinedInput-root': { borderRadius: '12px' } }} />
-              <Button type='submit' fullWidth variant='contained' sx={{ 
-                mt: 3, 
-                mb: 2, 
-                borderRadius: '25px',
-                background: 'linear-gradient(45deg, #667eea 30%, #764ba2 90%)',
-                height: '50px',
-                fontSize: '1.1rem',
-                fontWeight: 'bold',
-                boxShadow: '0 4px 15px rgba(0, 0, 0, 0.2)',
-                '&:hover': {
-                  background: 'linear-gradient(45deg, #5a67d8 30%, #6b5b95 90%)',
-                  transform: 'translateY(-2px)',
-                  boxShadow: '0 6px 20px rgba(0, 0, 0, 0.3)',
-                }
-              }} disabled={!userName || !password || signInDisable}>
-                {signInDisable ? <CircularProgress size={24} color='inherit' /> : 'Sign In'}
-              </Button>
-              <Grid container justifyContent='flex-end'>
-                <Grid item>
-                  <Link href='/signin' onClick={formChange} variant='body2'>Don&apos;t have an account? Sign Up</Link>
-                </Grid>
+              boxShadow: '0 4px 15px rgba(0, 0, 0, 0.2)',
+              '&:hover': {
+                background: '#174333',
+                transform: 'translateY(-2px)',
+                boxShadow: '0 6px 20px rgba(0, 0, 0, 0.3)',
+              }
+            }} disabled={!userName.trim() || !password || signInDisable}>
+              {signInDisable ? <CircularProgress size={24} color='inherit' /> : 'Sign In'}
+            </Button>
+            <Grid container justifyContent='flex-end'>
+              <Grid item>
+                <Link href='/signin' onClick={formChange} variant='body2'>Don&apos;t have an account? Sign Up</Link>
               </Grid>
-            </Box>
+            </Grid>
           </Box>
-        </Container>
-      </ThemeProvider>
+        </Box>
+      </Container>
     </div>
   )
 }
@@ -210,311 +204,308 @@ const SignUp = ({ setSignInForm, onSignupSuccess }) => {
   }
 
   return (
-    <div style={{ 
-      minHeight: '100vh', 
-      display: 'flex', 
-      alignItems: 'center', 
+    <div style={{
+      minHeight: 'calc(100dvh - 68px)',
+      display: 'flex',
+      alignItems: 'center',
       justifyContent: 'center',
-      background: 'transparent' 
+      background: 'transparent'
     }}>
-      <ThemeProvider theme={theme}>
-        <Container component='main' maxWidth='sm'>
-          <CssBaseline />
-          <Box sx={{ 
-            display: 'flex', 
-            flexDirection: 'column', 
-            alignItems: 'center',
-            background: 'rgba(255, 255, 255, 0.95)',
-            borderRadius: '25px',
-            padding: '40px',
-            boxShadow: '0 25px 50px rgba(0, 0, 0, 0.15)',
-            backdropFilter: 'blur(20px)',
-            border: '1px solid rgba(255, 255, 255, 0.3)',
+      <Container maxWidth='sm'>
+        <Box sx={{
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          background: 'rgba(255, 255, 255, 0.95)',
+          borderRadius: '25px',
+          p: { xs: 3, sm: 5 },
+          boxShadow: '0 25px 50px rgba(0, 0, 0, 0.15)',
+          backdropFilter: 'blur(20px)',
+          border: '1px solid rgba(255, 255, 255, 0.3)',
+          position: 'relative',
+          overflow: 'hidden',
+          '&::before': {
+            content: '""',
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            height: '4px',
+            background: 'linear-gradient(45deg, #205b47, #34775d)',
+            zIndex: 1
+          }
+        }}>
+          <Avatar sx={{
+            m: 1,
+            bgcolor: 'secondary.main',
+            width: 70,
+            height: 70,
+            background: 'linear-gradient(45deg, #205b47, #34775d)',
+            boxShadow: '0 8px 20px rgba(102, 126, 234, 0.3)',
             position: 'relative',
-            overflow: 'hidden',
-            '&::before': {
-              content: '""',
-              position: 'absolute',
-              top: 0,
-              left: 0,
-              right: 0,
-              height: '4px',
-              background: 'linear-gradient(45deg, #667eea, #764ba2)',
-              zIndex: 1
-            }
+            zIndex: 2
           }}>
-            <Avatar sx={{ 
-              m: 1, 
-              bgcolor: 'secondary.main',
-              width: 70,
-              height: 70,
-              background: 'linear-gradient(45deg, #667eea 30%, #764ba2 90%)',
-              boxShadow: '0 8px 20px rgba(102, 126, 234, 0.3)',
-              position: 'relative',
-              zIndex: 2
-            }}>
-              <LockOutlinedIcon sx={{ fontSize: 35 }} />
-            </Avatar>
-            <Typography component='h1' variant='h4' sx={{ 
-              fontWeight: 'bold',
-              background: 'linear-gradient(45deg, #667eea 30%, #764ba2 90%)',
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
-              mb: 1,
-              textAlign: 'center'
-            }}>
-              🔐 Join ForumSphere
-            </Typography>
-            <Typography variant='body1' sx={{ 
-              color: '#666',
-              textAlign: 'center',
-              mb: 3,
-              fontSize: '1.1rem'
-            }}>
-              Create your account and start connecting
-            </Typography>
-            <Box component='form' noValidate onSubmit={signUp} sx={{ mt: 2, width: '100%' }}>
-              {submitError && <Alert severity='error' sx={{ mb: 2 }}>{submitError}</Alert>}
-              <Grid container spacing={3}>
-                <Grid item xs={12} sm={6}>
-                  <TextField 
-                    required 
-                    fullWidth 
-                    id='firstName' 
-                    label='👤 First Name' 
-                    name='firstName' 
-                    autoComplete='given-name'
-                    value={firstName} 
-                    onChange={firstNameChange} 
-                    helperText={firstNameError ? 'First Name is a required field' : ''} 
-                    error={firstNameError} 
-                    onBlur={firstNameBlur}
-                    sx={{ 
-                      '& .MuiOutlinedInput-root': { 
-                        borderRadius: '12px',
-                        '&:hover fieldset': {
-                          borderColor: '#667eea',
-                        },
-                        '&.Mui-focused fieldset': {
-                          borderColor: '#667eea',
-                        }
+            <LockOutlinedIcon sx={{ fontSize: 35 }} />
+          </Avatar>
+          <Typography component='h1' variant='h4' sx={{
+            fontWeight: 'bold',
+            background: 'linear-gradient(45deg, #205b47, #34775d)',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
+            mb: 1,
+            textAlign: 'center'
+          }}>
+            🔐 Join ForumSphere
+          </Typography>
+          <Typography variant='body1' sx={{
+            color: '#666',
+            textAlign: 'center',
+            mb: 3,
+            fontSize: '1.1rem'
+          }}>
+            Create your account and start connecting
+          </Typography>
+          <Box component='form' noValidate onSubmit={signUp} sx={{ mt: 2, width: '100%' }}>
+            {submitError && <Alert severity='error' sx={{ mb: 2 }}>{submitError}</Alert>}
+            <Grid container spacing={3}>
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  required
+                  fullWidth
+                  id='firstName'
+                  label='👤 First Name'
+                  name='firstName'
+                  autoComplete='given-name'
+                  value={firstName}
+                  onChange={firstNameChange}
+                  helperText={firstNameError ? 'First Name is a required field' : ''}
+                  error={firstNameError}
+                  onBlur={firstNameBlur}
+                  sx={{
+                    '& .MuiOutlinedInput-root': {
+                      borderRadius: '12px',
+                      '&:hover fieldset': {
+                        borderColor: '#667eea',
+                      },
+                      '&.Mui-focused fieldset': {
+                        borderColor: '#667eea',
                       }
-                    }}
-                  />
-                </Grid>
-                <Grid item xs={12} sm={6}>
-                  <TextField 
-                    required 
-                    fullWidth 
-                    id='lastName' 
-                    label='👤 Last Name' 
-                    name='lastName' 
-                    autoComplete='family-name'
-                    value={lastName} 
-                    onChange={lastNameChange} 
-                    helperText={lastNameError ? 'Last Name is a required field' : ''} 
-                    error={lastNameError} 
-                    onBlur={lastNameBlur}
-                    sx={{ 
-                      '& .MuiOutlinedInput-root': { 
-                        borderRadius: '12px',
-                        '&:hover fieldset': {
-                          borderColor: '#667eea',
-                        },
-                        '&.Mui-focused fieldset': {
-                          borderColor: '#667eea',
-                        }
-                      }
-                    }}
-                  />
-                </Grid>
-                <Grid item xs={12} sm={4}>
-                  <TextField 
-                    required 
-                    fullWidth 
-                    id='age' 
-                    label='🎂 Age' 
-                    name='age' 
-                    autoComplete='age'
-                    value={age} 
-                    onChange={ageChange} 
-                    helperText={ageError ? 'Age is a required field' : ''} 
-                    error={ageError} 
-                    onBlur={ageBlur}
-                    sx={{ 
-                      '& .MuiOutlinedInput-root': { 
-                        borderRadius: '12px',
-                        '&:hover fieldset': {
-                          borderColor: '#667eea',
-                        },
-                        '&.Mui-focused fieldset': {
-                          borderColor: '#667eea',
-                        }
-                      }
-                    }}
-                  />
-                </Grid>
-                <Grid item xs={12} sm={8}>
-                  <TextField 
-                    required 
-                    fullWidth 
-                    id='contactNumber' 
-                    label='📞 Contact Number' 
-                    name='contactNumber' 
-                    autoComplete='tel-national'
-                    value={contactNumber} 
-                    onChange={contactNumberChange} 
-                    helperText={contactNumberError ? 'Contact Number is a required field' : ''} 
-                    error={contactNumberError} 
-                    onBlur={contactNumberBlur}
-                    sx={{ 
-                      '& .MuiOutlinedInput-root': { 
-                        borderRadius: '12px',
-                        '&:hover fieldset': {
-                          borderColor: '#667eea',
-                        },
-                        '&.Mui-focused fieldset': {
-                          borderColor: '#667eea',
-                        }
-                      }
-                    }}
-                  />
-                </Grid>
-                <Grid item xs={12}>
-                  <TextField 
-                    required 
-                    fullWidth 
-                    id='userName' 
-                    label='🏷️ Username' 
-                    name='username' 
-                    autoComplete='username'
-                    value={userName} 
-                    onChange={userNameChange} 
-                    helperText={userNameError ? 'Username is a required field' : ''} 
-                    error={userNameError} 
-                    onBlur={userNameBlur}
-                    sx={{ 
-                      '& .MuiOutlinedInput-root': { 
-                        borderRadius: '12px',
-                        '&:hover fieldset': {
-                          borderColor: '#667eea',
-                        },
-                        '&.Mui-focused fieldset': {
-                          borderColor: '#667eea',
-                        }
-                      }
-                    }}
-                  />
-                </Grid>
-                <Grid item xs={12}>
-                  <TextField 
-                    required 
-                    fullWidth 
-                    id='email' 
-                    label='📧 Email Address' 
-                    name='email' 
-                    autoComplete='email'
-                    value={email} 
-                    onChange={emailChange} 
-                    helperText={emailError ? 'Email is a required field' : ''} 
-                    error={emailError} 
-                    onBlur={emailBlur}
-                    sx={{ 
-                      '& .MuiOutlinedInput-root': { 
-                        borderRadius: '12px',
-                        '&:hover fieldset': {
-                          borderColor: '#667eea',
-                        },
-                        '&.Mui-focused fieldset': {
-                          borderColor: '#667eea',
-                        }
-                      }
-                    }}
-                  />
-                </Grid>
-                <Grid item xs={12}>
-                  <TextField 
-                    required 
-                    fullWidth 
-                    name='password' 
-                    label='🔒 Password' 
-                    type='password' 
-                    id='password' 
-                    autoComplete='new-password'
-                    value={password} 
-                    onChange={passwordChange} 
-                    helperText={passwordError ? 'Password must be at least 8 characters' : 'Use at least 8 characters'} 
-                    error={passwordError} 
-                    onBlur={passwordBlur}
-                    sx={{ 
-                      '& .MuiOutlinedInput-root': { 
-                        borderRadius: '12px',
-                        '&:hover fieldset': {
-                          borderColor: '#667eea',
-                        },
-                        '&.Mui-focused fieldset': {
-                          borderColor: '#667eea',
-                        }
-                      }
-                    }}
-                  />
-                </Grid>
+                    }
+                  }}
+                />
               </Grid>
-              <Button 
-                type='submit' 
-                fullWidth 
-                variant='contained' 
-                sx={{ 
-                  mt: 4, 
-                  mb: 3,
-                  borderRadius: '30px',
-                  background: 'linear-gradient(45deg, #667eea 30%, #764ba2 90%)',
-                  height: '55px',
-                  fontSize: '1.2rem',
-                  fontWeight: 'bold',
-                  boxShadow: '0 8px 25px rgba(102, 126, 234, 0.4)',
-                  transition: 'all 0.3s ease',
-                  '&:hover': {
-                    background: 'linear-gradient(45deg, #5a67d8 30%, #6b5b95 90%)',
-                    transform: 'translateY(-3px)',
-                    boxShadow: '0 12px 35px rgba(102, 126, 234, 0.5)',
-                  },
-                  '&:disabled': {
-                    background: 'rgba(0, 0, 0, 0.12)',
-                    color: 'rgba(0, 0, 0, 0.26)',
-                    transform: 'none',
-                    boxShadow: 'none'
-                  }
-                }}
-                disabled={!firstName || !lastName || !userName || !email || !age || !contactNumber || password.length < 8 || signUpDisable}
-              >
-                {signUpDisable ? <CircularProgress size={24} color='inherit' /> : 'Create Account'}
-              </Button>
-              <Grid container justifyContent='center'>
-                <Grid item>
-                  <Link 
-                    href='/signin' 
-                    variant='body2' 
-                    onClick={formChange}
-                    sx={{
-                      color: '#667eea',
-                      textDecoration: 'none',
-                      fontWeight: 'bold',
-                      fontSize: '1rem',
-                      '&:hover': {
-                        color: '#5a67d8',
-                        textDecoration: 'underline'
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  required
+                  fullWidth
+                  id='lastName'
+                  label='👤 Last Name'
+                  name='lastName'
+                  autoComplete='family-name'
+                  value={lastName}
+                  onChange={lastNameChange}
+                  helperText={lastNameError ? 'Last Name is a required field' : ''}
+                  error={lastNameError}
+                  onBlur={lastNameBlur}
+                  sx={{
+                    '& .MuiOutlinedInput-root': {
+                      borderRadius: '12px',
+                      '&:hover fieldset': {
+                        borderColor: '#667eea',
+                      },
+                      '&.Mui-focused fieldset': {
+                        borderColor: '#667eea',
                       }
-                    }}
-                  >
-                    Already have an account? Sign in ✨
-                  </Link>
-                </Grid>
+                    }
+                  }}
+                />
               </Grid>
-            </Box>
+              <Grid item xs={12} sm={4}>
+                <TextField
+                  required
+                  fullWidth
+                  id='age'
+                  label='🎂 Age'
+                  name='age'
+                  autoComplete='age'
+                  value={age}
+                  onChange={ageChange}
+                  helperText={ageError ? 'Age is a required field' : ''}
+                  error={ageError}
+                  onBlur={ageBlur}
+                  sx={{
+                    '& .MuiOutlinedInput-root': {
+                      borderRadius: '12px',
+                      '&:hover fieldset': {
+                        borderColor: '#667eea',
+                      },
+                      '&.Mui-focused fieldset': {
+                        borderColor: '#667eea',
+                      }
+                    }
+                  }}
+                />
+              </Grid>
+              <Grid item xs={12} sm={8}>
+                <TextField
+                  required
+                  fullWidth
+                  id='contactNumber'
+                  label='📞 Contact Number'
+                  name='contactNumber'
+                  autoComplete='tel-national'
+                  value={contactNumber}
+                  onChange={contactNumberChange}
+                  helperText={contactNumberError ? 'Contact Number is a required field' : ''}
+                  error={contactNumberError}
+                  onBlur={contactNumberBlur}
+                  sx={{
+                    '& .MuiOutlinedInput-root': {
+                      borderRadius: '12px',
+                      '&:hover fieldset': {
+                        borderColor: '#667eea',
+                      },
+                      '&.Mui-focused fieldset': {
+                        borderColor: '#667eea',
+                      }
+                    }
+                  }}
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <TextField
+                  required
+                  fullWidth
+                  id='userName'
+                  label='🏷️ Username'
+                  name='username'
+                  autoComplete='username'
+                  value={userName}
+                  onChange={userNameChange}
+                  helperText={userNameError ? 'Username is a required field' : ''}
+                  error={userNameError}
+                  onBlur={userNameBlur}
+                  sx={{
+                    '& .MuiOutlinedInput-root': {
+                      borderRadius: '12px',
+                      '&:hover fieldset': {
+                        borderColor: '#667eea',
+                      },
+                      '&.Mui-focused fieldset': {
+                        borderColor: '#667eea',
+                      }
+                    }
+                  }}
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <TextField
+                  required
+                  fullWidth
+                  id='email'
+                  label='📧 Email Address'
+                  name='email'
+                  autoComplete='email'
+                  value={email}
+                  onChange={emailChange}
+                  helperText={emailError ? 'Email is a required field' : ''}
+                  error={emailError}
+                  onBlur={emailBlur}
+                  sx={{
+                    '& .MuiOutlinedInput-root': {
+                      borderRadius: '12px',
+                      '&:hover fieldset': {
+                        borderColor: '#667eea',
+                      },
+                      '&.Mui-focused fieldset': {
+                        borderColor: '#667eea',
+                      }
+                    }
+                  }}
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <TextField
+                  required
+                  fullWidth
+                  name='password'
+                  label='🔒 Password'
+                  type='password'
+                  id='password'
+                  autoComplete='new-password'
+                  value={password}
+                  onChange={passwordChange}
+                  helperText={passwordError ? 'Password must be at least 8 characters' : 'Use at least 8 characters'}
+                  error={passwordError}
+                  onBlur={passwordBlur}
+                  sx={{
+                    '& .MuiOutlinedInput-root': {
+                      borderRadius: '12px',
+                      '&:hover fieldset': {
+                        borderColor: '#667eea',
+                      },
+                      '&.Mui-focused fieldset': {
+                        borderColor: '#667eea',
+                      }
+                    }
+                  }}
+                />
+              </Grid>
+            </Grid>
+            <Button
+              type='submit'
+              fullWidth
+              variant='contained'
+              sx={{
+                mt: 4,
+                mb: 3,
+                borderRadius: '30px',
+                background: 'linear-gradient(45deg, #205b47, #34775d)',
+                height: '55px',
+                fontSize: '1.2rem',
+                fontWeight: 'bold',
+                boxShadow: '0 8px 25px rgba(102, 126, 234, 0.4)',
+                transition: 'all 0.3s ease',
+                '&:hover': {
+                  background: '#174333',
+                  transform: 'translateY(-3px)',
+                  boxShadow: '0 12px 35px rgba(102, 126, 234, 0.5)',
+                },
+                '&:disabled': {
+                  background: 'rgba(0, 0, 0, 0.12)',
+                  color: 'rgba(0, 0, 0, 0.26)',
+                  transform: 'none',
+                  boxShadow: 'none'
+                }
+              }}
+              disabled={!firstName || !lastName || !userName || !email || !age || !contactNumber || password.length < 8 || signUpDisable}
+            >
+              {signUpDisable ? <CircularProgress size={24} color='inherit' /> : 'Create Account'}
+            </Button>
+            <Grid container justifyContent='center'>
+              <Grid item>
+                <Link
+                  href='/signin'
+                  variant='body2'
+                  onClick={formChange}
+                  sx={{
+                    color: '#667eea',
+                    textDecoration: 'none',
+                    fontWeight: 'bold',
+                    fontSize: '1rem',
+                    '&:hover': {
+                      color: '#5a67d8',
+                      textDecoration: 'underline'
+                    }
+                  }}
+                >
+                  Already have an account? Sign in ✨
+                </Link>
+              </Grid>
+            </Grid>
           </Box>
-        </Container>
-      </ThemeProvider>
+        </Box>
+      </Container>
     </div>
   )
 }

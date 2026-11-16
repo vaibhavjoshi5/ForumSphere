@@ -13,7 +13,7 @@ const StatCard = ({ label, value }) => (
   <Card sx={{ height: '100%' }}>
     <CardContent>
       <Typography color='text.secondary'>{label}</Typography>
-      <Typography variant='h3' sx={{ fontWeight: 700, color: '#667eea' }}>{value}</Typography>
+      <Typography variant='h3' sx={{ fontWeight: 700, color: 'primary.main' }}>{value}</Typography>
     </CardContent>
   </Card>
 )
@@ -45,8 +45,8 @@ const MySubStats = () => {
   ]
 
   return (
-    <Box sx={{ p: 3 }}>
-      <Typography variant='h4' sx={{ color: 'white', mb: 3, fontWeight: 700 }}>
+    <Box sx={{ p: { xs: 0, sm: 2 } }}>
+      <Typography component='h1' variant='h4' sx={{ color: 'text.primary', mb: 3, fontWeight: 700 }}>
         {community.name} statistics
       </Typography>
       <Grid container spacing={3}>

@@ -13,13 +13,10 @@ const createNewPost = async (userToken, postDetails) => {
   return response.data
 }
 
-const updatePostDetails = async (userToken, post) => {
-  const token = `bearer ${userToken}`
-  const config = {
-    headers: { Authorization: token }
-  }
-
-  const response = await axios.put(`${allsubgreddiitsUrl}/${post.postedIn}`, post, config)
+const interactWithPost = async (userToken, post, action) => {
+  const response = await axios.patch(`${allsubgreddiitsUrl}/${post.postedIn}/posts/${post.id}`, action, {
+    headers: { Authorization: `bearer ${userToken}` }
+  })
   return response.data
 }
 
@@ -63,4 +60,4 @@ const handleReport = async (userToken, subId, reportObj) => {
   return response.data
 }
 
-export { createNewPost, updatePostDetails, savePost, removeSavedPost, reportPost, handleReport }
+export { createNewPost, interactWithPost, savePost, removeSavedPost, reportPost, handleReport }

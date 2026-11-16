@@ -1,117 +1,70 @@
-import Card from '@mui/material/Card'
-import CardActions from '@mui/material/CardActions'
-import CardActionArea from '@mui/material/CardActionArea'
-import CardContent from '@mui/material/CardContent'
-import Button from '@mui/material/Button'
-import Typography from '@mui/material/Typography'
-import Dialog from '@mui/material/Dialog'
-import DialogActions from '@mui/material/DialogActions'
-import DialogContent from '@mui/material/DialogContent'
-import DialogContentText from '@mui/material/DialogContentText'
+import { useState } from 'react'
+import { Link } from 'react-router-dom'
+import { Alert, Avatar, Box, Button, Card, CardActions, CardContent, Chip, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Stack, Typography } from '@mui/material'
+import GroupOutlined from '@mui/icons-material/GroupOutlined'
+import ChatBubbleOutlineRounded from '@mui/icons-material/ChatBubbleOutlineRounded'
+import { addJoinRequest, leaveSubHub } from '../../services/subgreddiits'
 
-import { useEffect, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { getAllSubHubPage, addJoinRequest, leaveSubHub } from '../../services/subgreddiits'
-import { getUserFields } from '../../services/userFields'
+const AllSubElem = ({ community, token, onUpdate }) => {
+  const [busy, setBusy] = useState(false)
+  const [confirmLeave, setConfirmLeave] = useState(false)
+  const [error, setError] = useState('')
+  const { id, name, description, members, posts, tags, creator, isMember, requested, cannotRejoin } = community
 
-const AllSubElem = ({ allSubId }) => {
-  const user = JSON.parse(window.localStorage.getItem('loggedUser'))
-  const navigate = useNavigate()
-  const [subPageData, setSubPageData] = useState(null)
-  const [userData, setUserData] = useState({})
-  const [open, setOpen] = useState(false)
-  const [allDisable, setAllDisable] = useState(false)
-  const [requestError, setRequestError] = useState('')
-
-  useEffect(
-    () => {
-      const getSubPageData = async () => {
-        const subData = await getAllSubHubPage(user.token, allSubId)
-        setSubPageData(subData)
+  const changeMembership = async () => {
+    setBusy(true)
+    setError('')
+    try {
+      if (isMember) {
+        const updated = await leaveSubHub(token, id)
+        onUpdate(id, { isMember: false, cannotRejoin: true, members: updated.members.length })
+        setConfirmLeave(false)
+      } else {
+        await addJoinRequest(token, id)
+        onUpdate(id, { requested: true })
       }
-      getSubPageData()
-
-      const getUserDetails = async () => {
-        const userDetails = await getUserFields()
-        setUserData(userDetails)
-      }
-      getUserDetails()
-    }, [user.token, allSubId])
-
-  const onCardClick = async event => {
-    event.preventDefault()
-    if (subPageData && (subPageData.isMember || subPageData.creator))
-      navigate(`/allsubgreddiits/${allSubId}`)
-  }
-
-  const onClose = () => setOpen(false)
-
-  const onRequestJoin = async () => {
-    if (userData.left.includes(allSubId)) setOpen(true)
-    else {
-      try {
-        setAllDisable(true)
-        setRequestError('')
-        const requestedSub = await addJoinRequest(user.token, allSubId)
-        setSubPageData(requestedSub)
-      } catch (error) {
-        setRequestError(error.response?.data?.error || 'Unable to send join request')
-      } finally {
-        setAllDisable(false)
-      }
+    } catch (failure) {
+      setError(failure.response?.data?.error || 'Could not update membership. Try again.')
+      setConfirmLeave(false)
+    } finally {
+      setBusy(false)
     }
   }
 
-  const onLeave = async () => {
-    setAllDisable(true)
-    await leaveSubHub(user.token, allSubId)
-    setAllDisable(false)
-  }
-
   return (
-    <>
-      {
-        subPageData ?
-          <Card variant='outlined' sx={{ mb: 1, border: 1 }} maxwidth='xs'>
-            <Dialog open={open} onClose={onClose}>
-              <DialogContent>
-                <DialogContentText>
-                    You already left/have been removed from "{subPageData.name}"! You cannot rejoin the community!
-                </DialogContentText>
-              </DialogContent>
-              <DialogActions>
-                <Button onClick={onClose}>Ok</Button>
-              </DialogActions>
-            </Dialog>
-            <CardActionArea onClick={onCardClick}>
-              <CardContent>
-                <Typography variant='h5' component='div' color='green'>{subPageData.name}</Typography>
-                <Typography sx={{ mb: 1.5 }} color='orange'>{subPageData.description}</Typography>
-                <Typography variant='body2'>Number of user(s) in community: {subPageData.members + 1}</Typography>
-                <Typography variant='body2'>Number of post(s) in community: {subPageData.posts}</Typography>
-                <Typography variant='body2'>Banned keywords:</Typography>
-                <Typography variant='body2' color='red'>{subPageData.bannedKeywords.join(', ')}</Typography>
-              </CardContent>
-            </CardActionArea>
-            <CardActions>
-              {userData.id ?
-                (
-                  subPageData.creator ?
-                    <Button size='small' variant='outlined' color='error' disabled>Leave</Button> :
-                    (
-                      subPageData.isMember ?
-                        <Button size='small' variant='outlined' color='error' disabled={allDisable} onClick={onLeave}>Leave</Button> :
-                        <Button size='small' variant='outlined' color='primary' disabled={subPageData.requested || allDisable} onClick={onRequestJoin}>Request Join</Button>
-                    )
-                ) :
-                null}
-            </CardActions>
-            {requestError && <Typography color='error' sx={{ px: 2, pb: 2 }}>{requestError}</Typography>}
-          </Card>
-          : null
-      }
-
-    </>
+    <Card variant='outlined' component='article' sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+      <CardContent sx={{ flexGrow: 1, overflowWrap: 'anywhere' }}>
+        <Stack direction='row' alignItems='center' justifyContent='space-between' spacing={1} sx={{ mb: 2 }}>
+          <Avatar sx={{ bgcolor: '#e4f2e9', color: 'primary.main', fontWeight: 800 }}>{name.slice(0, 2).toUpperCase()}</Avatar>
+          {(creator || isMember || requested) && <Chip size='small' label={creator ? 'Owner' : isMember ? 'Member' : 'Request pending'} />}
+        </Stack>
+        <Typography component='h3' variant='h6' fontWeight={800}>{name}</Typography>
+        <Typography color='text.secondary' sx={{ mt: 0.5, mb: 2 }}>{description || 'No description yet.'}</Typography>
+        <Stack direction='row' flexWrap='wrap' gap={2} color='text.secondary' sx={{ fontSize: '0.875rem' }}>
+          <Stack direction='row' alignItems='center' spacing={0.5}><GroupOutlined fontSize='small' /><span>{members + 1} members</span></Stack>
+          {typeof posts === 'number' && <Stack direction='row' alignItems='center' spacing={0.5}><ChatBubbleOutlineRounded fontSize='small' /><span>{posts} posts</span></Stack>}
+        </Stack>
+        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.75, mt: 2 }}>
+          {tags?.map(tag => <Chip key={tag} size='small' label={tag} variant='outlined' />)}
+        </Box>
+        {error && <Alert severity='error' sx={{ mt: 2 }}>{error}</Alert>}
+      </CardContent>
+      <CardActions sx={{ px: 2, pb: 2 }}>
+        {(creator || isMember) && <Button component={Link} to={'/allsubgreddiits/' + id} variant='contained' size='small'>Open community</Button>}
+        {isMember && !creator && <Button size='small' disabled={busy} onClick={() => setConfirmLeave(true)}>Leave</Button>}
+        {!creator && !isMember && <Button variant='outlined' size='small' disabled={busy || requested || cannotRejoin} onClick={changeMembership}>
+          {requested ? 'Request sent' : cannotRejoin ? 'Rejoining unavailable' : busy ? 'Sending…' : 'Request to join'}
+        </Button>}
+      </CardActions>
+      <Dialog open={confirmLeave} onClose={busy ? undefined : () => setConfirmLeave(false)} aria-labelledby={'leave-' + id}>
+        <DialogTitle id={'leave-' + id}>Leave {name}?</DialogTitle>
+        <DialogContent><DialogContentText>Once you leave, you cannot rejoin this community.</DialogContentText></DialogContent>
+        <DialogActions>
+          <Button disabled={busy} onClick={() => setConfirmLeave(false)}>Cancel</Button>
+          <Button color='error' disabled={busy} onClick={changeMembership}>{busy ? 'Leaving…' : 'Leave community'}</Button>
+        </DialogActions>
+      </Dialog>
+    </Card>
   )
 }
 

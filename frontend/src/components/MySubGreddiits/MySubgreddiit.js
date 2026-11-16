@@ -187,10 +187,10 @@ const MySubGreddiit = () => {
     <div style={{ 
       minHeight: '100vh', 
       background: 'transparent',
-      padding: '15px'
+      padding: '0'
     }}>
       <ThemeProvider theme={theme}>
-        <Container component='main' maxWidth='lg'>
+        <Container disableGutters maxWidth='lg'>
           <CssBaseline />
           <Box sx={{ 
             display: 'flex', 
@@ -200,7 +200,7 @@ const MySubGreddiit = () => {
           }}>
             <Box sx={{
               textAlign: 'center',
-              mb: 3,
+              mb: 2,
               background: 'linear-gradient(135deg, rgba(255,255,255,0.25) 0%, rgba(255,255,255,0.15) 100%)',
               borderRadius: '15px',
               padding: '15px 20px',
@@ -209,21 +209,19 @@ const MySubGreddiit = () => {
               boxShadow: '0 6px 25px rgba(0,0,0,0.15)'
             }}>
               <h1 style={{ 
-                color: '#ffffff',
+                color: '#172923',
                 fontSize: '2rem',
                 fontWeight: 'bold',
-                textShadow: '2px 2px 6px rgba(0,0,0,0.8)',
                 marginBottom: '8px',
                 fontFamily: 'Arial, sans-serif'
               }}>
-                🏠 My Communities 🏠
+                My communities
               </h1>
               <p style={{
-                color: '#ffffff',
+                color: '#172923',
                 fontSize: '1rem',
                 margin: '0',
                 fontWeight: '500',
-                textShadow: '1px 1px 3px rgba(0,0,0,0.8)',
                 fontFamily: 'Arial, sans-serif'
               }}>
                 Create and manage your own communities
@@ -236,14 +234,14 @@ const MySubGreddiit = () => {
                 mt: 1, 
                 mb: 2,
                 borderRadius: '25px',
-                background: 'linear-gradient(45deg, #667eea 30%, #764ba2 90%)',
+                background: '#205b47',
                 fontSize: '1rem',
                 fontWeight: 'bold',
                 padding: '10px 30px',
                 boxShadow: '0 6px 20px rgba(102, 126, 234, 0.4)',
                 transition: 'all 0.3s ease',
                 '&:hover': {
-                  background: 'linear-gradient(45deg, #5a67d8 30%, #6b5b95 90%)',
+                  background: '#174333',
                   transform: 'translateY(-2px)',
                   boxShadow: '0 8px 25px rgba(102, 126, 234, 0.5)',
                 },
@@ -258,7 +256,7 @@ const MySubGreddiit = () => {
               onClick={() => setNewDisable(!newDisable)} 
               endIcon={<AddIcon />}
             >
-              ✨ Create New Community
+              Create community
             </Button>
             {
               newDisable ?                  <Box 
@@ -371,7 +369,7 @@ const MySubGreddiit = () => {
                               label={tag} 
                               onDelete={event => removeTag(event, tag)}
                               sx={{ 
-                                background: 'linear-gradient(45deg, #667eea 30%, #764ba2 90%)',
+                                background: '#205b47',
                                 color: 'white',
                                 fontWeight: 'bold',
                                 '& .MuiChip-deleteIcon': {
@@ -415,10 +413,10 @@ const MySubGreddiit = () => {
                             onClick={event => addTag(event, tag)}
                             sx={{ 
                               borderRadius: '20px',
-                              background: 'linear-gradient(45deg, #667eea 30%, #764ba2 90%)',
+                              background: '#205b47',
                               minWidth: '80px',
                               '&:hover': {
-                                background: 'linear-gradient(45deg, #5a67d8 30%, #6b5b95 90%)',
+                                background: '#174333',
                               }
                             }}
                           />
@@ -533,12 +531,12 @@ const MySubGreddiit = () => {
                       sx={{ 
                         flex: 1,
                         borderRadius: '25px',
-                        background: 'linear-gradient(45deg, #667eea 30%, #764ba2 90%)',
+                        background: '#205b47',
                         fontSize: '1.1rem',
                         fontWeight: 'bold',
                         padding: '12px',
                         '&:hover': {
-                          background: 'linear-gradient(45deg, #5a67d8 30%, #6b5b95 90%)',
+                          background: '#174333',
                           transform: 'translateY(-2px)',
                         }
                       }} 
@@ -584,20 +582,18 @@ const MySubGreddiit = () => {
             boxShadow: '0 6px 25px rgba(0,0,0,0.15)'
           }}>
             <h2 style={{ 
-              color: '#ffffff',
+              color: '#172923',
               fontSize: '1.8rem',
               fontWeight: 'bold',
-              textShadow: '2px 2px 6px rgba(0,0,0,0.8)',
               marginBottom: '5px',
               fontFamily: 'Arial, sans-serif'
             }}>
               🌟 Your Communities 🌟
             </h2>
             <p style={{
-              color: '#ffffff',
+              color: '#172923',
               fontSize: '0.9rem',
               margin: '0',
-              textShadow: '1px 1px 3px rgba(0,0,0,0.8)',
               fontWeight: '500',
               fontFamily: 'Arial, sans-serif'
             }}>
@@ -622,14 +618,14 @@ const MySubGreddiit = () => {
                   border: '1px solid rgba(255,255,255,0.2)'
                 }}>
                   <h3 style={{
-                    color: 'rgba(255,255,255,0.8)',
+                    color: '#4e6259',
                     fontSize: '1.2rem',
                     marginBottom: '10px'
                   }}>
                     🎯 No Communities Yet
                   </h3>
                   <p style={{
-                    color: 'rgba(255,255,255,0.6)',
+                    color: '#4e6259',
                     fontSize: '1rem',
                     margin: '0'
                   }}>

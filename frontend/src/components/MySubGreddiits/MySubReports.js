@@ -1,3 +1,5 @@
+import Skeleton from '@mui/material/Skeleton'
+import Alert from '@mui/material/Alert'
 import Grid from '@mui/material/Grid'
 import Card from '@mui/material/Card'
 import CardActions from '@mui/material/CardActions'
@@ -120,19 +122,18 @@ const Report = ({ report, reportData, userToken }) => {
 const MySubReports = () => {
   const [reportData, setReportData] = useState(null)
 
+  const [loadError, setLoadError] = useState('')
   const user = JSON.parse(window.localStorage.getItem('loggedUser'))
   const params = useParams()
 
-  useEffect(
-    () => {
-      const getReportData = async () => {
-        const reportDetails = await getMySubHubPageReports(user.token, params.id)
-        setReportData(reportDetails)
-      }
+  useEffect(() => {
+    let active = true
+    getMySubHubPageReports(user.token, params.id)
+      .then(data => { if (active) setReportData(data) })
+      .catch(error => { if (active) setLoadError(error.response?.data?.error || 'Could not load this page.') })
+    return () => { active = false }
+  }, [user.token, params.id])
 
-      getReportData()
-    }, [user.token, params.id]
-  )
 
   const ignoreSort = (reportA, reportB) => {
     if (reportA.action === '' && reportB.action !== '') return -1
@@ -142,16 +143,18 @@ const MySubReports = () => {
 
   return (
     <>
+      <Typography component='h1' variant='h4' fontWeight={800} sx={{ mb: 2 }}>Reports</Typography>
+      {loadError && <Alert severity='error'>{loadError}</Alert>}
       {
-        reportData ?
+        reportData ? (reportData.reports.length ?
           <Grid container spacing={2} sx={{ mt: 1 }}>
             {
-              reportData.reports.sort(ignoreSort).map(report =>
+              [...reportData.reports].sort(ignoreSort).map(report =>
                 <Report key={report.id} report={report} reportData={reportData} userToken={user.token} />
               )
             }
           </Grid>
-          : null
+          : <Alert severity='info'>No reports to review.</Alert>) : !loadError && <Skeleton variant='rounded' height={160} />
       }
     </>
   )

@@ -1,3 +1,5 @@
+import Skeleton from '@mui/material/Skeleton'
+import Alert from '@mui/material/Alert'
 import Avatar from '@mui/material/Avatar'
 import Grid from '@mui/material/Grid'
 import List from '@mui/material/List'
@@ -16,21 +18,22 @@ import { getMySubHubPage } from '../../services/subgreddiits'
 const MySubUsers = () => {
   const [mySubPage, setMySubPage] = useState({})
   const params = useParams()
+  const [loadError, setLoadError] = useState('')
   const user = JSON.parse(window.localStorage.getItem('loggedUser'))
 
-  useEffect(
-    () => {
-      const getSubPage = async () => {
-        const mySubDetails = await getMySubHubPage(user.token, params.id)
-        setMySubPage(mySubDetails)
-      }
+  useEffect(() => {
+    let active = true
+    getMySubHubPage(user.token, params.id)
+      .then(data => { if (active) setMySubPage(data) })
+      .catch(error => { if (active) setLoadError(error.response?.data?.error || 'Could not load this page.') })
+    return () => { active = false }
+  }, [user.token, params.id])
 
-      getSubPage()
-    }, [user.token, params.id]
-  )
 
   return (
     <>
+      <Typography component='h1' variant='h4' fontWeight={800} sx={{ mb: 2 }}>Community members</Typography>
+      {loadError && <Alert severity='error'>{loadError}</Alert>}
       {
         mySubPage.id ?
           <Grid container spacing={2}>
@@ -87,7 +90,7 @@ const MySubUsers = () => {
               </Card>
             </Grid>
           </Grid >
-          : null
+          : !loadError && <Skeleton variant='rounded' height={160} />
       }
     </>
   )

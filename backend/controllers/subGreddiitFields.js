@@ -13,6 +13,11 @@ subgreddiitRouter.get('/', async (request, response) => {
         {
           id: sub.id,
           name: sub.name,
+          description: sub.description,
+          posts: sub.posts.length,
+          cannotRejoin: request.user.left.includes(sub.id),
+          requested: sub.requests.some(joinRequest => joinRequest.userDetails === request.user.id &&
+            (!joinRequest.rejected || Date.now() - new Date(joinRequest.requestDate) <= (Number(config.REQUEST_EXPIRATION_DAYS) || 7) * 86400000)),
           creator: sub.creator.toString() === request.user.id,
           members: sub.members.length,
           tags: sub.tags,
@@ -22,6 +27,64 @@ subgreddiitRouter.get('/', async (request, response) => {
       )
     })
   )
+})
+
+const canAccess = (community, userId) => community.creator === userId || community.members.includes(userId)
+
+subgreddiitRouter.get('/:id/posts', async (request, response) => {
+  const community = await Subgreddiit.findById(request.params.id)
+    .populate({ path: 'posts', populate: { path: 'postedBy', model: 'User', select: 'userName' } })
+    .populate('reports')
+  if (!community)
+    return response.status(404).json({ error: 'Community not found' })
+  if (!canAccess(community, request.user.id))
+    return response.status(403).json({ error: 'Join this community to read its discussions' })
+
+  const posts = community.posts.filter(post => post.postedBy).map(post => ({
+    ...post.toJSON(),
+    postedBy: {
+      id: post.postedBy.id,
+      userName: community.blocked.includes(post.postedBy.id) && community.creator !== request.user.id
+        ? 'Blocked User' : post.postedBy.userName
+    },
+    reported: community.reports.some(report => report.postId === post.id && report.reportedBy === request.user.id)
+  }))
+  response.json({ name: community.name, description: community.description, posts })
+})
+
+subgreddiitRouter.patch('/:id/posts/:postId', async (request, response) => {
+  const { vote, reply } = request.body
+  const validVote = [0, 1, -1].includes(vote)
+  const text = typeof reply === 'string' ? reply.trim() : ''
+  if (vote === undefined ? !text || text.length > 2000 : !validVote || reply !== undefined)
+    return response.status(400).json({ error: 'Send one vote or a reply between 1 and 2,000 characters' })
+
+  const community = await Subgreddiit.findById(request.params.id)
+  if (!community)
+    return response.status(404).json({ error: 'Community not found' })
+  if (!canAccess(community, request.user.id))
+    return response.status(403).json({ error: 'Join this community to interact' })
+
+  const result = await db.inTransaction(async () => {
+    const rows = await db.execute('SELECT id FROM posts WHERE id = ? AND postedIn = ? FOR UPDATE', [request.params.postId, community.id])
+    if (!rows.length) return null
+    const post = await Post.findById(request.params.postId)
+    if (validVote) {
+      const voter = request.user.id
+      post.upvotedBy = post.upvotedBy.filter(id => id !== voter)
+      post.downvotedBy = post.downvotedBy.filter(id => id !== voter)
+      if (vote === 1) post.upvotedBy.push(voter)
+      if (vote === -1) post.downvotedBy.push(voter)
+      post.upvotes = post.upvotedBy.length
+      post.downvotes = post.downvotedBy.length
+    } else post.replies.push(text)
+    await post.save()
+    const { upvotes, downvotes, upvotedBy, downvotedBy, replies } = post
+    return { upvotes, downvotes, upvotedBy, downvotedBy, replies }
+  })
+  if (!result)
+    return response.status(404).json({ error: 'Post not found' })
+  response.json(result)
 })
 
 subgreddiitRouter.get('/:id', async (request, response) => {

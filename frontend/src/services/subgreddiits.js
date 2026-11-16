@@ -114,3 +114,9 @@ const savedImageUrl = async formData => {
 }
 
 export { createMySubHub, getAllMySubHubs, getMySubHubPage, getAllSubHubs, getAllSubHubPage, addJoinRequest, handleJoinRequest, getMySubHubPageReports, leaveSubHub, deleteMySubHub, savedImageUrl }
+export const getCommunityFeed = async (token, id) => {
+  const response = await axios.get(`${allsubhubsUrl}/${id}/posts`, {
+    headers: { Authorization: `bearer ${token}` }
+  })
+  return response.data
+}
