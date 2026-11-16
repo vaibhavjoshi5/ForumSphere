@@ -76,7 +76,7 @@ const CommunityRoute = ({ user, children }) => {
   if (!user)
     return <Navigate replace to='/signin' />
 
-  if (!/^[a-f\d]{24}$/i.test(id || ''))
+  if (!/^(?:[a-f\d]{24}|[a-f\d]{8}-[a-f\d]{4}-[a-f\d]{4}-[a-f\d]{4}-[a-f\d]{12})$/i.test(id || ''))
     return <Navigate replace to='/mysubgreddiits' />
 
   return children

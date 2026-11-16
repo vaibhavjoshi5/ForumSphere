@@ -26,7 +26,7 @@ const Navbar = ({ user, onLogout }) => {
   const [anchorElNav, setAnchorElNav] = useState(null)
   const navigate = useNavigate()
   const location = useLocation()
-  const moderatorPathMatch = location.pathname.match(/^\/mysubgreddiits\/([a-f\d]{24})(?:\/|$)/i)
+  const moderatorPathMatch = location.pathname.match(/^\/mysubgreddiits\/((?:[a-f\d]{24}|[a-f\d]{8}-[a-f\d]{4}-[a-f\d]{4}-[a-f\d]{4}-[a-f\d]{12}))(?:\/|$)/i)
   const subId = moderatorPathMatch?.[1] || ''
   const isModeratorPage = Boolean(subId)
 

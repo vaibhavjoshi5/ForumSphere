@@ -4,9 +4,15 @@ const signinRouter = require('express').Router()
 const User = require('../models/user')
 
 signinRouter.post('/', async (request, response) => {
-  const { userName, password } = request.body
+  const { userName, email, password } = request.body || {}
+  const identifier = email === undefined ? userName : email
+  if (typeof identifier !== 'string' || !identifier.trim() || typeof password !== 'string' || !password)
+    return response.status(400).json({ error: 'Enter your username or email and password' })
+  const query = email === undefined
+    ? { userName: identifier.trim() }
+    : { email: identifier.trim().toLowerCase() }
 
-  const user = await User.findOne({ userName })
+  const user = await User.findOne(query)
   const passwordCorrect = user === null
     ? false
     : await bcrypt.compare(password, user.passwordHash)

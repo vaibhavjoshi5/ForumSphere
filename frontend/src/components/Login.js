@@ -30,15 +30,19 @@ const SignIn = ({ setSignInForm, onLogin, successMessage }) => {
   const signIn = async event => {
     event.preventDefault()
 
-    const userData = {
-      userName: userName,
-      password: password,
-    }
+    const identifier = userName.trim()
+    const userData = identifier.includes('@')
+      ? { email: identifier, password }
+      : { userName: identifier, password }
 
     try {
       setSignInDisable(true)
       setSubmitError('')
-      const user = await signin(userData)
+      const user = await signin(userData).catch(error => {
+        if (userData.email && error.response?.status === 401)
+          return signin({ userName: identifier, password })
+        throw error
+      })
       window.localStorage.setItem('loggedUser', JSON.stringify(user))
       onLogin(user)
       navigate('/home')
@@ -98,7 +102,7 @@ const SignIn = ({ setSignInForm, onLogin, successMessage }) => {
             <Box component='form' onSubmit={signIn} noValidate sx={{ mt: 1 }}>
               {successMessage && <Alert severity='success' sx={{ mb: 1 }}>{successMessage}</Alert>}
               {submitError && <Alert severity='error' sx={{ mb: 1 }}>{submitError}</Alert>}
-              <TextField margin='normal' required fullWidth id='userName' label='Username' name='username' autoComplete='username'
+              <TextField margin='normal' required fullWidth id='userName' label='Username or email' name='username' autoComplete='username'
                 value={userName} onChange={userNameChange} helperText={userNameError ? 'Username is a required field' : ''} error={userNameError} onBlur={userNameBlur} 
                 sx={{ '& .MuiOutlinedInput-root': { borderRadius: '12px' } }} />
               <TextField margin='normal' required fullWidth name='password' label='Password' type='password' id='password' autoComplete='current-password'
